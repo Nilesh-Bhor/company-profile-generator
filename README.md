@@ -1,2 +1,2 @@
 # company-profile-generator
-Generate a profession company profile for the given company using the Google Gemini
+Generate a profession company profile for the given company using the Google Gemini and Streamlit UI
