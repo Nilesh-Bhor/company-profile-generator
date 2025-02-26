@@ -205,9 +205,12 @@ class CompanyProfile:
             
             # Title slide with logo
             title_slide = prs.slides.add_slide(prs.slide_layouts[0])
+            
             title = title_slide.shapes.title
+            company_name = self.profile_data['company_overview']['name'] if 'company_overview' in self.profile_data else self.company_name
+            title.text = company_name
+
             subtitle = title_slide.placeholders[1]
-            title.text = self.company_name
             subtitle.text = "Company Profile"
             
             logo = self.logo
@@ -232,7 +235,7 @@ class CompanyProfile:
 
                 slide = prs.slides.add_slide(prs.slide_layouts[1])
                 title = slide.shapes.title
-                title.text = overview['name']            
+                title.text = overview['name']
                 content = slide.placeholders[1].text_frame            
                 p = content.paragraphs[0]
                 p.text = overview['description']
