@@ -3,25 +3,25 @@ import os
 import io
 import json
 import pdfkit
+from google import genai
+from google.genai import types
+from googlesearch import search
 from pptx import Presentation
 from pptx.util import Inches, Pt
-import google.generativeai as genai
-
 from utils.utility import get_logo
 
 class CompanyProfile:
-    def __init__(self, company_name):
+    def __init__(self, company_name, company_website=None):
         self.profile_data = None
         self.markdown_data = None
         self.company_name = company_name
+        self.company_website = company_website
         self.logo_url = f"https://logo.clearbit.com/{company_name.lower().replace(' ', '')}.com"
         self.logo = get_logo(self.logo_url)
         
-        # Configure Google Gemini AI
+        # Configure Google Generative AI
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-        genai.configure(api_key=GOOGLE_API_KEY)
-        self.model = genai.GenerativeModel('gemini-2.0-flash')
-    
+        self.client = genai.Client(api_key=GOOGLE_API_KEY)
 
     def create_markdown(self, json_data):
         markdown_text = ""
@@ -33,7 +33,7 @@ class CompanyProfile:
                 company_name = overview.get('name', self.company_name)
                 logo_url = self.logo_url if self.logo is not None else overview['logo_url']
                 
-                markdown_text += f"# <img src='{logo_url}' height='50' align='left'> &nbsp;{company_name}\n\n"
+                markdown_text += f"# &nbsp;{company_name} <img src='{logo_url}' height='50' align='left'> \n\n"
                 markdown_text += f"{overview.get('description', '')}\n\n"
                 
                 for key in ['industry', 'location', 'mission', 'vision']:
@@ -115,17 +115,19 @@ class CompanyProfile:
     def get_company_profile(self):
         try:
             prompt = f"""
-            You are a research analyst. Generate a detailed and professional company profile for {self.company_name}.
+            You are an expert research analyst. Generate a detailed and professional company profile for {self.company_name}.
+            {"The company's website is " + self.company_website + "." if self.company_website else ""}
             Provide the response in the following JSON structure:
             {{
                 "company_overview": {{
                     "name": "Company Name",
+                    "website": "Company Website",
                     "description": "General overview of the company",
                     "industry": "Primary industry",
                     "location": "Headquarters location",
                     "mission": "Company mission statement",
                     "vision": "Company vision statement",
-                    "logo_url": "URL to the company's official logo"
+                    "logo_url": "URL to the company's official logo empty if not available"
                 }},
                 "products_and_services": {{
                     "products": {{
@@ -179,18 +181,51 @@ class CompanyProfile:
                 }}
             }}
             
-            Ensure all data is accurate and up-to-date. Include sources where applicable.
+            Ensure all data is accurate, up-to-date and include sources.
             For the logo_url, provide a direct link to the company's official logo image.
             Format the response as valid JSON.
             """
-            
-            response = self.model.generate_content(prompt)            
-            # Clean up the response by removing markdown code block markers
-            json_response = response.text.strip()
-            json_response = re.sub(r'^```json\s*|\s*```$', '', json_response)
 
-            self.profile_data = json.loads(json_response)
-            self.markdown_data = self.create_markdown(self.profile_data)
+            # Search for additional company information
+            include_search = os.getenv('INCLUDE_GOOGLE_SEARCH', 'False').lower() == 'true'
+            if include_search:
+                query = f"{self.company_name} company profile"
+                search_results = search(query, num_results=2, advanced=True)
+                if search_results:
+                    company_search = None
+                    
+                    for search_result in list(search_results):
+                        if search_result.title and search_result.url:
+                            company_search = search_result
+                            break
+
+                    if company_search:
+                        prompt += f"""
+                        Here is an additional info about the company:
+                        title: {company_search.title}
+                        url: {company_search.url}
+                        description: {company_search.description}
+                        """
+           
+            response = self.client.models.generate_content(
+                model="gemini-2.0-flash", 
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    tools=[
+                        types.Tool(
+                            google_search=types.GoogleSearch()
+                        )
+                    ]
+                )
+            ) 
+
+            if len(response.text) > 0:
+                # Clean up the response by removing markdown code block markers
+                json_response = response.text.strip()
+                json_response = re.sub(r'^```json\s*|\s*```$', '', json_response)
+
+                self.profile_data = json.loads(json_response)
+                self.markdown_data = self.create_markdown(self.profile_data)
             
             return self.markdown_data
         except Exception as e:
@@ -211,7 +246,8 @@ class CompanyProfile:
             title.text = company_name
 
             subtitle = title_slide.placeholders[1]
-            subtitle.text = "Company Profile"
+            company_site = self.profile_data['company_overview']['website'] if 'company_overview' in self.profile_data else self.company_website
+            subtitle.text = f"{company_site} \n\n Company Profile" if company_site else "Company Profile"
             
             logo = self.logo
             if logo is None:
@@ -396,8 +432,8 @@ class CompanyProfile:
 
     def get_pdf(self):
         try:
-            pdfkit.configuration(wkhtmltopdf='./wkhtmltox/bin/wkhtmltopdf')            
-            pdf_buffer = pdfkit.from_string(self.markdown_data, False)
+            config = pdfkit.configuration(wkhtmltopdf='./wkhtmltox/bin/wkhtmltopdf')            
+            pdf_buffer = pdfkit.from_string(self.markdown_data, configuration=config)
             return pdf_buffer
         except Exception as e:
             print(f"An error occurred: {str(e)}")

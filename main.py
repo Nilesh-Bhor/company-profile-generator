@@ -11,6 +11,7 @@ def clear_session_state():
     st.session_state.profile = None
     st.session_state.ppt_buffer = None
     st.session_state.profile_data = None
+    st.session_state.company_website = None
 
 # Streamlit UI
 st.title("Company Profile Generator")
@@ -18,6 +19,9 @@ st.write("Enter a company name to get its detailed profile")
 
 # Input field for company name
 company_name = st.text_input("Company Name")
+
+# Input field for company website
+company_website = st.text_input("Company Website (optional)")
 
 # Streamlit UI
 if 'profile' not in st.session_state:
@@ -28,7 +32,7 @@ if st.button("Generate Profile"):
     if company_name:
         clear_session_state()
         with st.spinner("Generating company profile..."):
-            company_profile = CompanyProfile(company_name)
+            company_profile = CompanyProfile(company_name, company_website)
             st.session_state.profile = company_profile.get_company_profile()
             st.session_state.profile_data = company_profile.profile_data
             st.session_state.ppt_buffer = company_profile.get_ppt()
