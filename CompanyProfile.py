@@ -105,6 +105,14 @@ class CompanyProfile:
                         markdown_text += f"* **{metric['year']}**: Revenue {metric['revenue']}, Growth {metric['growth']}\n"
                 
                 markdown_text += "\n---\n"
+            
+            # Sources
+            if 'sources' in json_data:
+                markdown_text += "## Sources\n\n"
+                for source in json_data['sources']:
+                    markdown_text += f"* {source}\n"
+                
+                markdown_text += "\n---\n"
 
         except Exception as e:
             print(f"An error occurred: {str(e)}")
@@ -178,7 +186,8 @@ class CompanyProfile:
                             "growth": "YoY growth"
                         }}
                     ]
-                }}
+                }},
+                sources: ["list of the sources used"]
             }}
             
             Ensure all data is accurate, up-to-date and include sources.
