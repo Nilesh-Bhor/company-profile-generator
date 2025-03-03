@@ -6,6 +6,7 @@ def get_logo(logo_url):
         response = requests.get(logo_url)
         if response.status_code == 200:
             return BytesIO(response.content)
-        return None
     except:
-        return None
+        print(f"Error getting logo: {logo_url}")
+    
+    return None
