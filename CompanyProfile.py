@@ -447,7 +447,8 @@ class CompanyProfile:
     def get_pdf(self):
         try:
             if self.markdown_data is not None:
-                config = pdfkit.configuration(wkhtmltopdf='./wkhtmltox/bin/wkhtmltopdf.exe')
+                wkhtmltopdf_path = os.getenv('WKHTMLTOPDF_PATH')
+                config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
                 # Convert markdown to HTML
                 html = markdown.markdown(self.markdown_data)
