@@ -224,13 +224,14 @@ class CompanyProfile:
                 model="gemini-2.0-flash", 
                 contents=prompt,
                 config=types.GenerateContentConfig(
+                    temperature=0.1,
                     tools=[
                         types.Tool(
                             google_search=types.GoogleSearch()
                         )
                     ]
                 )
-            ) 
+            )
 
             if len(response.text) > 0:
                 # Clean up the response by removing markdown code block markers
