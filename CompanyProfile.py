@@ -37,7 +37,7 @@ class CompanyProfile:
                 company_name = overview.get('name', self.company_name)
                 logo_url = self.logo_url if self.logo is not None else overview['logo_url']
                 
-                markdown_text += f"# {company_name} <img src='{logo_url}' height='50' align='left' style='margin-right: 10px;'> \n\n"
+                markdown_text += f"# <img src='{logo_url}' height='50' align='left' style='margin-right: 10px;'> {company_name} \n\n"
                 markdown_text += f"{overview.get('description', '')}\n\n"
                 
                 for key in ['industry', 'location', 'mission', 'vision']:
@@ -481,3 +481,13 @@ class CompanyProfile:
         self.markdown_data = self.create_markdown(self.profile_data)
 
         return self.markdown_data
+
+    def update_profile_with_markdown(self, markdown_content):
+        """Update the profile data based on edited markdown content"""
+        # Store the original markdown
+        self.profile = markdown_content
+        
+        # Here you could add logic to parse the markdown and update specific sections
+        # of the profile_data if needed. For now, we'll just keep the markdown updated
+        # and regenerate PPT/PDF with the new content
+        return self.profile
