@@ -26,16 +26,18 @@ class CompanyProfile:
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
         self.client = genai.Client(api_key=GOOGLE_API_KEY)
 
-    def create_markdown(self, json_data):
+    def create_markdown(self):
         markdown_text = ""
         try:
-            if json_data is not None:
+            if self.profile_data is not None:
                 # Company Overview
-                if 'company_overview' in json_data:
-                    overview = json_data['company_overview']
+                if 'company_overview' in self.profile_data:
+                    overview = self.profile_data['company_overview']
             
                 company_name = overview.get('name', self.company_name)
                 logo_url = self.logo_url if self.logo is not None else overview['logo_url']
+
+                self.profile_data['company_overview']['logo'] = logo_url
                 
                 markdown_text += f"# <img src='{logo_url}' height='50' align='left' style='margin-right: 10px;'> {company_name} \n\n"
                 markdown_text += f"{overview.get('description', '')}\n\n"
@@ -47,11 +49,11 @@ class CompanyProfile:
                 markdown_text += "\n---\n\n"
         
                 # Products and Services
-                if 'products_and_services' in json_data:
+                if 'products_and_services' in self.profile_data:
                     # Products
-                    if 'products' in json_data['products_and_services']:
+                    if 'products' in self.profile_data['products_and_services']:
                         markdown_text += "## Products\n\n"
-                        products = json_data['products_and_services']['products']
+                        products = self.profile_data['products_and_services']['products']
                         markdown_text += f"{products.get('description', '')}\n\n"
                         for item in products.get('items', []):
                             markdown_text += f"#### {item['name']}\n"
@@ -65,9 +67,9 @@ class CompanyProfile:
                         markdown_text += "---\n\n"
 
                     # Services
-                    if 'services' in json_data['products_and_services']:
+                    if 'services' in self.profile_data['products_and_services']:
                         markdown_text += "## Services\n\n"
-                        services = json_data['products_and_services']['services']
+                        services = self.profile_data['products_and_services']['services']
                         markdown_text += f"{services.get('description', '')}\n\n"
                         for item in services.get('items', []):
                             markdown_text += f"#### {item['name']}\n"
@@ -81,9 +83,9 @@ class CompanyProfile:
                         markdown_text += "---\n\n"
 
                 # Management Team
-                if 'management_team' in json_data:
+                if 'management_team' in self.profile_data:
                     markdown_text += "## Management Team\n\n"
-                    team = json_data['management_team']
+                    team = self.profile_data['management_team']
                     markdown_text += f"{team.get('description', '')}\n\n"
                     for member in team.get('members', []):
                         markdown_text += f"#### {member['name']} - {member['position']}\n"
@@ -92,17 +94,17 @@ class CompanyProfile:
                     markdown_text += "---\n\n"
                 
                 # Milestones
-                if 'milestones' in json_data and json_data['milestones']:
+                if 'milestones' in self.profile_data and self.profile_data['milestones']:
                     markdown_text += "## Key Milestones\n\n"
-                    for milestone in json_data['milestones']:
+                    for milestone in self.profile_data['milestones']:
                         markdown_text += f"* **{milestone['date']}**: {milestone['description']}\n"
                     
                     markdown_text += "\n---\n\n"
                 
                 # Financial Highlights
-                if 'financial_highlights' in json_data:
+                if 'financial_highlights' in self.profile_data:
                     markdown_text += "## Financial Highlights\n\n"
-                    financials = json_data['financial_highlights']
+                    financials = self.profile_data['financial_highlights']
                     markdown_text += f"{financials.get('overview', '')}\n\n"
                     if 'metrics' in financials:
                         for metric in financials['metrics']:
@@ -111,9 +113,9 @@ class CompanyProfile:
                     markdown_text += "\n---\n"
                 
                 # Sources
-                if 'sources' in json_data:
+                if 'sources' in self.profile_data:
                     markdown_text += "## Sources\n\n"
-                    for source in json_data['sources']:
+                    for source in self.profile_data['sources']:
                         markdown_text += f"* {source}\n"
                     
                     markdown_text += "\n---\n"
@@ -239,7 +241,7 @@ class CompanyProfile:
                 json_response = re.sub(r'^.*?```json\s*|\s*```$', '', json_response, flags=re.DOTALL)
 
                 self.profile_data = json.loads(json_response)
-                self.markdown_data = self.create_markdown(self.profile_data)
+                self.markdown_data = self.create_markdown()
 
             return self.markdown_data
         except Exception as e:
@@ -479,7 +481,7 @@ class CompanyProfile:
     def format_profile(self, profile_data):
         """Format an existing profile from data"""
         self.profile_data = profile_data
-        self.markdown_data = self.create_markdown(self.profile_data)
+        self.markdown_data = self.create_markdown()
 
         return self.markdown_data
 
