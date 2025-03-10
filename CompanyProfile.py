@@ -4,6 +4,8 @@ import io
 import json
 import pdfkit
 import markdown
+import requests
+import yfinance as yf
 from bs4 import BeautifulSoup
 from google import genai
 from google.genai import types
@@ -11,6 +13,7 @@ from googlesearch import search
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from utils.utility import get_logo
+from alpha_vantage.fundamentaldata import FundamentalData
 
 class CompanyProfile:
     def __init__(self, company_name, company_website=None):
@@ -25,6 +28,10 @@ class CompanyProfile:
         # Configure Google Generative AI
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
         self.client = genai.Client(api_key=GOOGLE_API_KEY)
+        
+        # Configure Alpha Vantage API
+        ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
+        self.alpha_vantage = FundamentalData(key=ALPHA_VANTAGE_API_KEY)
 
     def create_markdown(self, json_data):
         markdown_text = ""
@@ -123,11 +130,39 @@ class CompanyProfile:
         
         return markdown_text
     
+    def get_company_symbol (self):
+        url = "https://query2.finance.yahoo.com/v1/finance/search"
+        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+        parameters = {"q": self.company_name, "quotes_count": 1}
+        response = requests.get(url = url, params = parameters, headers={'User-Agent': user_agent}) 
+        data = response.json()
+        symbol = data['quotes'][0]['symbol']
+        return symbol    
+
+    def fetch_financial_data(self):
+        """Fetch financial data from Yahoo Finance and update profile_data."""
+        try:
+            symbol = self.get_company_symbol()
+            data = yf.Ticker(symbol)  # Use company name as ticker
+            print(f"\n\Earning: {data.income_stmt}")            
+
+        except Exception as e:
+            print(f"An error occurred while fetching financial data: {str(e)}")
+    
+    def get_financial_data(self):
+        try:
+            symbol = self.get_company_symbol()
+            data, _ = self.alpha_vantage.get_company_overview(symbol)
+            return data
+        except Exception as e:
+            print(f"An error occurred while fetching financial data: {str(e)}")
+            return None
 
     def get_company_profile(self):
         try:
             prompt = f"""
-            You are an expert research analyst. Generate a detailed and professional company profile for {self.company_name}.
+            You are a helpful analyst that generates company profile.
+            Generate a detailed and professional company profile for {self.company_name}.
             {"The company's website is " + self.company_website + "." if self.company_website else ""}
             Provide the response in the following JSON structure:
             {{
@@ -182,7 +217,7 @@ class CompanyProfile:
                     }}
                 ],
                 "financial_highlights": {{
-                    "overview": "Financial performance summary for the last 5 years",
+                    "overview": "Financial highlights for last 5 years",
                     "metrics": [
                         {{
                             "year": "Year",
@@ -191,7 +226,7 @@ class CompanyProfile:
                         }}
                     ]
                 }},
-                sources: ["list of the sources used"]
+                "sources": ["list of the sources used"]
             }}
             
             Ensure all data is accurate, up-to-date and include sources.
@@ -239,6 +274,13 @@ class CompanyProfile:
                 json_response = re.sub(r'^.*?```json\s*|\s*```$', '', json_response, flags=re.DOTALL)
 
                 self.profile_data = json.loads(json_response)
+                
+                # Fetch and update financial data
+                #financial_data = self.get_financial_data()
+                #self.fetch_financial_data()
+                #if financial_data:
+                    #self.profile_data['financial_highlights'] = financial_data
+
                 self.markdown_data = self.create_markdown(self.profile_data)
 
             return self.markdown_data
@@ -246,8 +288,7 @@ class CompanyProfile:
             print(f"An error occurred while generating company profile: {str(e)}")
         
         return None
-    
-    
+
     def get_ppt(self):
         if self.profile_data is not None:
             try:
@@ -472,7 +513,7 @@ class CompanyProfile:
                 pdf_buffer = pdfkit.from_string(html_content, configuration=config)
                 return pdf_buffer
         except Exception as e:
-            print(f"An error occurred while generating PDF: {str(e)}")
+            print(f"An error occurred while generating PDF: {e}")
 
         return None
 

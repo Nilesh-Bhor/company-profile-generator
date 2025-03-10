@@ -48,7 +48,7 @@ if shared_data:
         st.session_state.ppt_buffer = company_profile.get_ppt()
         st.session_state.pdf_buffer = company_profile.get_pdf()
         st.session_state.is_shared_view = True
-        st.switch_page("pages/2_📝_Profile_View.py")
+        st.switch_page("pages/2_📝_Profile.py")
     else:
         st.error("Invalid shared profile data")
 else:            
@@ -77,7 +77,7 @@ else:
                     # Show other pages after profile generation
                     st.session_state.show_other_pages = True
                     # Redirect to profile view
-                    st.switch_page("pages/2_📝_Profile_View.py")
+                    st.switch_page("pages/2_📝_Profile.py")
             else:
                 st.warning("Please enter a company name")
                 clear_session_state()

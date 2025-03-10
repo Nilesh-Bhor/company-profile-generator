@@ -1,9 +1,12 @@
 bs4
 markdown
-streamlit
 requests
 pdfkit
 python-pptx
 python-dotenv
 google-genai
 googlesearch-python
+streamlit
+streamlit-quill
+yfinance
+alpha_vantage

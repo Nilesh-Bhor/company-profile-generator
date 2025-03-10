@@ -1,9 +1,10 @@
 import streamlit as st
 from CompanyProfile import CompanyProfile
+from streamlit_quill import st_quill  # Import the Quill editor
 
 # Check if pages should be shown
 if not st.session_state.get('show_other_pages', False):
-    st.switch_page("🏢_Profile_Generator.py")
+    st.switch_page("🏢_Home.py")
 
 st.set_page_config(page_title="Company Profile Editor", page_icon="✏️", layout="wide")
 
@@ -98,15 +99,15 @@ if 'profile' in st.session_state and st.session_state.profile is not None:
     with editor_col:
         st.markdown('<h3>Editor</h3>', unsafe_allow_html=True)
 
-        # Add the text editor
+        # Add the Quill editor
         if 'original_markdown' not in st.session_state:
             st.session_state.original_markdown = st.session_state.profile
         
-        edited_markdown = st.text_area(
-            "",  # Remove label
+        edited_markdown = st_quill(
+            label="Edit your content",  # Label for the Quill editor
             value=st.session_state.original_markdown,
             height=600,  # Set minimum height for editor
-            key="markdown_editor"
+            key="quill_editor"
         )
         
         # Update cursor position when text changes
