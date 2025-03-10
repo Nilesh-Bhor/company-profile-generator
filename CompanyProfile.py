@@ -37,7 +37,7 @@ class CompanyProfile:
                 company_name = overview.get('name', self.company_name)
                 logo_url = self.logo_url if self.logo is not None else overview['logo_url']
 
-                self.profile_data['company_overview']['logo'] = logo_url
+                self.profile_data['company_overview']['logo_url'] = logo_url
                 
                 markdown_text += f"# <img src='{logo_url}' height='50' align='left' style='margin-right: 10px;'> {company_name} \n\n"
                 markdown_text += f"{overview.get('description', '')}\n\n"

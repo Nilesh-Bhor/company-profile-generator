@@ -1,6 +1,6 @@
 import streamlit as st
 from CompanyProfile import CompanyProfile
-from utils.utility import encode_profile_data, decode_profile_data
+from utils.database import save_profile_data, load_profile_data
 from styles.styles import side_bar_hide_style, profile_view_style
 
 def clear_session_state():
@@ -14,11 +14,11 @@ def clear_session_state():
         st.session_state.custom_name = None
 
 # Check if this is a shared profile
-shared_data = st.query_params.get("share", None)
+shared_profile_id = st.query_params.get("share", None)
 
-if shared_data:
+if shared_profile_id:
     clear_session_state()
-    decoded_data = decode_profile_data(shared_data)
+    decoded_data = load_profile_data(shared_profile_id)
     
     if decoded_data:
         st.session_state.profile_data = decoded_data
@@ -62,8 +62,9 @@ def create_download_buttons(include_share=True):
     
     # Add share button only if not in shared view
     if include_share and not st.session_state.is_shared_view:
+        profile_id = save_profile_data(st.session_state.profile_data)
         base_url = st.request_url_root if hasattr(st, 'request_url_root') else '/'
-        share_url = f"{base_url}Profile?share={encode_profile_data(st.session_state.profile_data)}"
+        share_url = f"{base_url}Profile?share={profile_id}"
         right.markdown(f'<a href="{share_url}" target="_blank"><button style="padding: 0.5rem 1rem; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Share Profile</button></a>', unsafe_allow_html=True)
 
 
