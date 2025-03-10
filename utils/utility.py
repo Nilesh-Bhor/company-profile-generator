@@ -15,8 +15,12 @@ def get_logo(logo_url):
 
 
 def encode_profile_data(data):
-    json_str = json.dumps(data)
-    return base64.urlsafe_b64encode(json_str.encode()).decode()
+    try:
+        json_str = json.dumps(data, default=str)
+        return base64.urlsafe_b64encode(json_str.encode()).decode()
+    except TypeError as e:
+        print(f"Error encoding data: {e}")
+        return None
 
 
 def decode_profile_data(encoded_data):

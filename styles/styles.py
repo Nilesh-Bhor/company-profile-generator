@@ -56,15 +56,6 @@ def side_bar_hide_style():
                 max-width: 800px;
                 margin: 0 auto;
             }
-            .stButton > button {
-                width: 100%;
-                margin-top: 20px;
-                background-color: #1E88E5;
-                color: white;
-            }
-            .stButton > button:hover {
-                background-color: #1976D2;
-            }
         </style>
     """;
 

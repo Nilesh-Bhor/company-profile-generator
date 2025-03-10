@@ -3,7 +3,7 @@ from CompanyProfile import CompanyProfile
 
 # Check if pages should be shown
 if not st.session_state.get('show_other_pages', False):
-    st.switch_page("🏢_Profile_Generator.py")
+    st.switch_page("🏢_Home.py")
 
 st.set_page_config(page_title="Company Profile Editor", page_icon="✏️", layout="wide")
 
@@ -141,4 +141,4 @@ if 'profile' in st.session_state and st.session_state.profile is not None:
 
 else:
     st.warning("No profile available. Please generate a profile first.")
-    st.switch_page("🏢_Profile_Generator.py") 
+    st.switch_page("🏢_Home.py") 
