@@ -25,8 +25,8 @@ if shared_profile_id:
         company_profile = CompanyProfile(decoded_data["company_overview"]["name"])
         st.session_state.profile = company_profile.format_profile(decoded_data)
         st.session_state.profile_data = company_profile.profile_data
-        st.session_state.ppt_buffer = company_profile.get_ppt()
-        st.session_state.pdf_buffer = company_profile.get_pdf()
+        st.session_state.ppt_buffer = company_profile.generate_ppt()
+        st.session_state.pdf_buffer = company_profile.generate_pdf()
         st.session_state.is_shared_view = True
     else:
         st.error("Invalid shared profile data")

@@ -1,19 +1,17 @@
-import re   
+import re
 import os
 import io
 import json
 import pdfkit
 import markdown
 from bs4 import BeautifulSoup
-from google import genai
-from google.genai import types
-from googlesearch import search
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from utils.utility import get_logo
+from agents.agent_factory import AgentFactory, AgentType
 
 class CompanyProfile:
-    def __init__(self, company_name, company_website=None):
+    def __init__(self, company_name, company_website=None, agent_type=None):
         self.profile_data = None
         self.markdown_data = None
         self.company_name = company_name
@@ -21,10 +19,15 @@ class CompanyProfile:
         logo_name = company_name.lower().replace(' ', '').replace('.', '')
         self.logo_url = f"https://logo.clearbit.com/{logo_name}.com"
         self.logo = get_logo(self.logo_url)
+
+        if agent_type is None:
+            # Get agent type from environment variable
+            agent_type_str = os.getenv('AGENT_TYPE', 'GOOGLE_GEMINI')
+            agent_type = AgentType[agent_type_str] if agent_type_str in AgentType.__members__ else AgentType.GOOGLE_GEMINI
         
-        # Configure Google Generative AI
-        GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-        self.client = genai.Client(api_key=GOOGLE_API_KEY)
+        # Configure the agent
+        self.agent = AgentFactory.get_agent(agent_type)
+    
 
     def create_markdown(self):
         markdown_text = ""
@@ -128,116 +131,15 @@ class CompanyProfile:
 
     def get_company_profile(self):
         try:
-            prompt = f"""
-            You are an expert research analyst. Generate a detailed and professional company profile for {self.company_name}.
-            {"The company's website is " + self.company_website + "." if self.company_website else ""}
-            Provide the response in the following JSON structure:
-            {{
-                "company_overview": {{
-                    "name": "Company Name",
-                    "website": "Company Website",
-                    "description": "General overview of the company",
-                    "industry": "Primary industry",
-                    "location": "Headquarters location",
-                    "mission": "Company mission statement",
-                    "vision": "Company vision statement",
-                    "logo_url": "URL to the company's official logo from website or clearbit.com if not available"
-                }},
-                "products_and_services": {{
-                    "products": {{
-                        "description": "Overview of offerings",
-                        "items": [
-                            {{
-                                "name": "Product name",
-                                "description": "Detailed description",
-                                "features": ["feature1", "feature2"],
-                                "benefits": ["benefit1", "benefit2"]
-                            }}
-                        ]
-                    }},
-                    "services": {{
-                        "description": "Overview of services",
-                        "items": [
-                            {{
-                                "name": "Service name",
-                                "description": "Detailed description",
-                                "features": ["feature1", "feature2"],
-                                "benefits": ["benefit1", "benefit2"]
-                            }}
-                        ]   
-                    }}
-                }},
-                "management_team": {{
-                    "description": "Overview of leadership",
-                    "members": [
-                        {{
-                            "name": "Executive name",
-                            "position": "Role",
-                            "qualifications": "Key qualifications"
-                        }}
-                    ]
-                }},
-                "milestones": [
-                    {{
-                        "date": "Date of milestone",
-                        "description": "Description of achievement"
-                    }}
-                ],
-                "financial_highlights": {{
-                    "overview": "Financial performance summary for the last 5 years",
-                    "metrics": [
-                        {{
-                            "year": "Year",
-                            "revenue": "Annual revenue",
-                            "growth": "YoY growth"
-                        }}
-                    ]
-                }},
-                sources: ["list of the sources used"]
-            }}
-            
-            Ensure all data is accurate, up-to-date and include sources.
-            For the logo_url, provide a direct link to the company's official logo image.
-            Format the response as valid JSON.
-            """
+            prompt = self.agent.get_company_profile_prompt(self.company_name, self.company_website)
+            additional_info = self.agent.search_company_info(self.company_name)
+            prompt += additional_info
 
-            # Search for additional company information
-            include_search = os.getenv('INCLUDE_GOOGLE_SEARCH', 'False').lower() == 'true'
-            if include_search:
-                query = f"{self.company_name} company profile"
-                search_results = search(query, num_results=2, advanced=True)
-                if search_results:
-                    company_search = None
-                    
-                    for search_result in list(search_results):
-                        if search_result.title and search_result.url:
-                            company_search = search_result
-                            break
+            response_text = self.agent.generate_content(prompt)
 
-                    if company_search:
-                        prompt += f"""
-                        Here is an additional info about the company:
-                        title: {company_search.title}
-                        url: {company_search.url}
-                        description: {company_search.description}
-                        """
-           
-            response = self.client.models.generate_content(
-                model="gemini-2.0-flash", 
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    temperature=0.1,
-                    tools=[
-                        types.Tool(
-                            google_search=types.GoogleSearch()
-                        )
-                    ]
-                )
-            )
-
-            if len(response.text) > 0:
+            if len(response_text) > 0:
                 # Clean up the response by removing markdown code block markers
-                json_response = response.text.strip()
+                json_response = response_text.strip()
                 json_response = re.sub(r'^.*?```json\s*|\s*```$', '', json_response, flags=re.DOTALL)
 
                 self.profile_data = json.loads(json_response)
@@ -250,7 +152,7 @@ class CompanyProfile:
         return None
     
     
-    def get_ppt(self):
+    def generate_ppt(self):
         if self.profile_data is not None:
             try:
                 prs = Presentation()
@@ -445,9 +347,9 @@ class CompanyProfile:
                 print(f"An error occurred while generating PPT: {str(e)}")
         
         return None
-        
+    
 
-    def get_pdf(self):
+    def generate_pdf(self):
         try:
             if self.markdown_data is not None:
                 wkhtmltopdf_path = os.getenv('WKHTMLTOPDF_PATH')
@@ -477,6 +379,7 @@ class CompanyProfile:
             print(f"An error occurred while generating PDF: {str(e)}")
 
         return None
+    
 
     def format_profile(self, profile_data):
         """Format an existing profile from data"""
@@ -484,6 +387,7 @@ class CompanyProfile:
         self.markdown_data = self.create_markdown()
 
         return self.markdown_data
+    
 
     def update_profile_with_markdown(self, markdown_content):
         """Update the profile data based on edited markdown content"""
@@ -494,3 +398,4 @@ class CompanyProfile:
         # of the profile_data if needed. For now, we'll just keep the markdown updated
         # and regenerate PPT/PDF with the new content
         return self.profile
+    

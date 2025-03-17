@@ -15,7 +15,7 @@ if 'company_name' not in st.session_state:
     st.session_state.company_name = ""
 
 # Hide all pages by default in streamlit configuration
-st.set_page_config(page_title="Profile Generator", page_icon="🏢", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Company Profile Generator", page_icon="🏢", layout="centered", initial_sidebar_state="collapsed")
 
 # Hide other pages if no profile is generated or if it's a shared view
 if not st.session_state.show_other_pages or st.session_state.is_shared_view:
@@ -53,8 +53,8 @@ with st.container():
                 company_profile = CompanyProfile(company_name, company_website)
                 st.session_state.profile = company_profile.get_company_profile()
                 st.session_state.profile_data = company_profile.profile_data
-                st.session_state.ppt_buffer = company_profile.get_ppt()
-                st.session_state.pdf_buffer = company_profile.get_pdf()
+                st.session_state.ppt_buffer = company_profile.generate_ppt()
+                st.session_state.pdf_buffer = company_profile.generate_pdf()
                 # Show other pages after profile generation
                 st.session_state.show_other_pages = True
                 # Redirect to profile view
@@ -68,4 +68,4 @@ with st.container():
 
 # Add footer
 st.markdown("---")
-st.markdown("Powered by Google Gemini AI")
+st.markdown("Powered by AI")

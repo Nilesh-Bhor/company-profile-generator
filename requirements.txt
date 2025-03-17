@@ -2,6 +2,7 @@ bs4
 markdown
 streamlit
 requests
+openai
 pdfkit
 python-pptx
 python-dotenv
