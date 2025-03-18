@@ -1,7 +1,8 @@
+import menu
 import streamlit as st
+import styles.styles as cssStyles
 from CompanyProfile import CompanyProfile
 from utils.database import save_profile_data, load_profile_data
-from styles.styles import side_bar_hide_style, profile_view_style
 
 def clear_session_state():
     st.session_state.profile = None
@@ -30,15 +31,16 @@ if shared_profile_id:
         st.session_state.is_shared_view = True
     else:
         st.error("Invalid shared profile data")
+    
 
 # Add custom CSS for profile view
 if 'is_shared_view' in st.session_state and st.session_state.is_shared_view:
-    st.set_page_config(page_title="Company Profile View", page_icon="📋", layout="centered")
-    st.markdown(side_bar_hide_style(), unsafe_allow_html=True)    
+    st.set_page_config(page_title="Profile View", page_icon="📋", layout="centered")
+    st.markdown(cssStyles.side_bar_hide_style(), unsafe_allow_html=True)
 else:
-    st.set_page_config(page_title="Company Profile View", page_icon="📋", layout="wide")
+    st.set_page_config(page_title="Profile View", page_icon="📋", layout="wide")
 
-st.markdown(profile_view_style(), unsafe_allow_html=True)
+menu.show_menu()
 
 def create_download_buttons(include_share=True):
     left, middle, right = st.columns(3, gap="small")
@@ -64,7 +66,7 @@ def create_download_buttons(include_share=True):
     if include_share and not st.session_state.is_shared_view:
         profile_id = save_profile_data(st.session_state.profile_data)
         base_url = st.request_url_root if hasattr(st, 'request_url_root') else '/'
-        share_url = f"{base_url}Profile?share={profile_id}"
+        share_url = f"{base_url}profile_view?share={profile_id}"
         right.markdown(f'<a href="{share_url}" target="_blank"><button style="padding: 0.5rem 1rem; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Share Profile</button></a>', unsafe_allow_html=True)
 
 
@@ -81,4 +83,4 @@ if 'profile' in st.session_state and st.session_state.profile is not None:
     create_download_buttons()
 else:
     st.warning("No profile available. Please generate a profile first.")
-    st.switch_page("🏢_Home.py")
+    st.switch_page("app.py")

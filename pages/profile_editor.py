@@ -1,82 +1,16 @@
+import menu
 import streamlit as st
+import styles.styles as cssStyles
 from CompanyProfile import CompanyProfile
 
 # Check if pages should be shown
 if not st.session_state.get('show_other_pages', False):
-    st.switch_page("🏢_Home.py")
+    st.switch_page("app.py")
 
-st.set_page_config(page_title="Company Profile Editor", page_icon="✏️", layout="wide")
+st.set_page_config(page_title="Profile Editor", page_icon="✏️", layout="wide")
+st.markdown(cssStyles.editor_styles(), unsafe_allow_html=True)
 
-# Add custom CSS for StackEdit-like interface
-st.markdown("""
-<style>
-    /* Editor container */
-    .stApp {
-        background-color: #fafafa;
-    }
-    
-    /* Editor styling */
-    .editor-container {
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    /* Preview styling */
-    .preview-container {
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        height: 100%;
-    }
-    
-    .preview-content {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        line-height: 1.6;
-        color: #333;
-    }
-    
-    .preview-content h1, .preview-content h2, .preview-content h3 {
-        margin-top: 24px;
-        margin-bottom: 16px;
-        font-weight: 600;
-        line-height: 1.25;
-    }
-    
-    .preview-content p {
-        margin-bottom: 16px;
-    }
-    
-    /* Status bar */
-    .status-bar {
-        margin-top: 10px;
-        padding: 5px 10px;
-        background-color: #f8f9fa;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 12px;
-        color: #666;
-    }
-    
-    /* Custom textarea */
-    .stTextArea textarea {
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-        font-size: 14px;
-        line-height: 1.5;
-        padding: 15px;
-    }
-    
-    /* Toolbar button styling */
-    .stButton button {
-        margin: 0 2px;
-        padding: 2px 8px;
-    }
-</style>
-""", unsafe_allow_html=True)
+menu.show_menu()
 
 def insert_text_at_cursor(text: str, before: str = "", after: str = ""):
     """Helper function to insert text at cursor position or wrap selected text"""
@@ -88,6 +22,7 @@ def insert_text_at_cursor(text: str, before: str = "", after: str = ""):
     
     new_text = current_text[:position] + before + text + after + current_text[position:]
     return new_text
+
 
 if 'profile' in st.session_state and st.session_state.profile is not None:
     st.title("✏️ Company Profile Editor")
@@ -117,8 +52,7 @@ if 'profile' in st.session_state and st.session_state.profile is not None:
         word_count = len(edited_markdown.split())
         char_count = len(edited_markdown)
         st.markdown(f'<div class="status-bar">Words: {word_count} | Characters: {char_count}</div>', unsafe_allow_html=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+    
     
     with preview_col:
         st.markdown('<h3>Preview</h3>', unsafe_allow_html=True)
@@ -141,4 +75,4 @@ if 'profile' in st.session_state and st.session_state.profile is not None:
 
 else:
     st.warning("No profile available. Please generate a profile first.")
-    st.switch_page("🏢_Home.py") 
+    st.switch_page("app.py") 
