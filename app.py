@@ -1,7 +1,7 @@
+import menu
 import streamlit as st
 from dotenv import load_dotenv
 from CompanyProfile import CompanyProfile
-from styles.styles import side_bar_hide_style
 
 # Load environment variables
 load_dotenv()
@@ -14,12 +14,9 @@ if 'is_shared_view' not in st.session_state:
 if 'company_name' not in st.session_state:
     st.session_state.company_name = ""
 
-# Hide all pages by default in streamlit configuration
 st.set_page_config(page_title="Company Profile Generator", page_icon="🏢", layout="centered", initial_sidebar_state="collapsed")
 
-# Hide other pages if no profile is generated or if it's a shared view
-if not st.session_state.show_other_pages or st.session_state.is_shared_view:
-    st.markdown(side_bar_hide_style(), unsafe_allow_html=True)
+menu.show_menu()
 
 def clear_session_state():
     st.session_state.profile = None
@@ -58,7 +55,7 @@ with st.container():
                 # Show other pages after profile generation
                 st.session_state.show_other_pages = True
                 # Redirect to profile view
-                st.switch_page("pages/2_📝_Profile.py")
+                st.switch_page("pages/profile_view.py")
         else:
             st.warning("Please enter a company name")
             clear_session_state()
