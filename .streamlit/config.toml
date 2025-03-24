@@ -1,6 +1,4 @@
 [client]
-toolbarMode = "viewer"
-showErrorDetails = "none"
 showSidebarNavigation = false
 
 [theme]

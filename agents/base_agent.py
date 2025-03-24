@@ -1,82 +1,82 @@
 import os
 from googlesearch import search
+from datetime import datetime
 
 class BaseAgent:
+    def __init__(self, model_name: str):
+        self.schema = None
+        self.model_name = model_name
+        self._load_schema()
+
+    def _load_schema(self):
+        try:
+            schema_file_path = os.path.join(os.path.dirname(__file__), 'schema.json')
+            with open(schema_file_path, 'r') as schema_file:
+                self.schema = schema_file.read()
+        except Exception as e:
+            print(f"Error loading schema: {e}")
+    
     def generate_content(self, prompt: str) -> str:
         raise NotImplementedError("This method should be overridden by subclasses")
 
     def get_company_profile_prompt(self, company_name: str, company_website: str = None) -> str:
-        prompt = f"""
-        Generate a detailed and professional company profile for {company_name}.
-        {"The company's website is " + company_website + "." if company_website else ""}
-        Provide the response in the following JSON structure:
-        {{
-            "company_overview": {{
-                "name": "Company Name",
-                "website": "Company Website",
-                "description": "General overview of the company",
-                "industry": "Primary industry",
-                "location": "Headquarters location",
-                "mission": "Company mission statement",
-                "vision": "Company vision statement",
-                "logo_url": "URL to the company's official logo from website or clearbit.com if not available"
-            }},
-            "products_and_services": {{
-                "products": {{
-                    "description": "Overview of offerings",
-                    "items": [
-                        {{
-                            "name": "Product name",
-                            "description": "Detailed description",
-                            "features": ["feature1", "feature2"],
-                            "benefits": ["benefit1", "benefit2"]
-                        }}
-                    ]
-                }},
-                "services": {{
-                    "description": "Overview of services",
-                    "items": [
-                        {{
-                            "name": "Service name",
-                            "description": "Detailed description",
-                            "features": ["feature1", "feature2"],
-                            "benefits": ["benefit1", "benefit2"]
-                        }}
-                    ]   
-                }}
-            }},
-            "management_team": {{
-                "description": "Overview of leadership",
-                "members": [
-                    {{
-                        "name": "Executive name",
-                        "position": "Role",
-                        "qualifications": "Key qualifications"
-                    }}
-                ]
-            }},
-            "milestones": [
-                {{
-                    "date": "Date of milestone",
-                    "description": "Description of achievement"
-                }}
-            ],
-            "financial_highlights": {{
-                "overview": "Financial performance summary for the last 5 years",
-                "metrics": [
-                    {{
-                        "year": "Year",
-                        "revenue": "Annual revenue",
-                        "growth": "YoY growth"
-                    }}
-                ]
-            }},
-            sources: ["list of the sources used"]
-        }}
+        current_year = datetime.now().year
+        last_five_years = ', '.join(str(year) for year in range(current_year - 5, current_year))
         
-        Ensure all data is accurate, up-to-date and include sources.
-        For the logo_url, provide a direct link to the company's official logo image.
-        Format the response as valid JSON.
+        prompt = f"""
+        **Task:**
+        Gather comprehensive and up-to-date information about {company_name}. Ensure all data is accurate, cross-verified, and sourced from reliable sources.
+        {"The company's website is " + company_website + "." if company_website else ""}
+
+        ### **Company Overview:**  
+        - **Logo:** Provide the company’s logo; if unavailable, search on sources like Brandsoftheworld, Clearbit, or the company’s website.  
+        - **Business Description:** A brief overview of the company, including core operations.  
+        - **Mission Statement**  
+        - **Vision Statement**  
+        - **Founded:** Year and location of establishment.  
+        - **Industry:** Primary industry of operation.  
+        - **Headquarters Location:** Current HQ address.  
+        - **Website:** Official company website.  
+        - **Number of Employees:** Total employees as of {current_year}.  
+        - **Certifications:** List ISO certifications (if applicable).  
+        - **Industries Served:** Key industries the company caters to.  
+
+        ### **Geographic Presence:**  
+        - **List of Locations:** Include manufacturing sites, sales offices, corporate headquarters, and other key operational locations.  
+
+        ### **Financial Highlights (Last 5 Fiscal Years):**  
+        Ensure data for the last five years ({last_five_years}) is correct and cross-verified. Include:  
+        - **Revenue**  
+        - **EBIT (Earnings Before Interest & Taxes)**  
+        - **EBITDA (Earnings Before Interest, Taxes, Depreciation & Amortization)**  
+        - **Growth Rate** (YoY or CAGR)  
+        - **Gross Profit**  
+        - **Net Profit**  
+        - **Market Capitalization**  
+        - **Total Assets**  
+        - **Ownership Structure** (Public/Private, major stakeholders)  
+
+        ### **Products & Services:**  
+        - List the company’s major and most popular products/services. Provide a 1-2 line description for each.  
+
+        ### **Leadership Team:**  
+        - Provide names and titles of the top 5 executives (e.g., CEO, CFO, COO, CTO, etc.).  
+
+        ### **Clients & Competitors:**  
+        - **Major Clients:** Key customers or business partners.  
+        - **Major Competitors:** Companies competing in the same industry/market.  
+
+        ### **Company Strategies:**  
+        - Outline the company’s strategic initiatives, goals, and future direction.  
+
+        ### **Key Events (Last 3-5 Years):**  
+        Include significant corporate events such as:  
+        - **Mergers & Acquisitions (M&A)**  
+        - **Demerger/Spin-offs**  
+        - **Expansion (New markets, facilities, acquisitions, etc.)**  
+        - **Exit from a country/business segment**  
+        - **Recent Leadership Changes**  
+        - **Other Important Developments**
         """
         return prompt
 

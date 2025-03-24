@@ -1,0 +1,353 @@
+{
+    "name": "CompanyProfile",
+    "description": "Schema for representing company profile.",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "overview": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the company."
+                    },
+                    "website": {
+                        "type": "string",
+                        "description": "The company's website URL. If not available, use 'N/A'."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "General overview of the company."
+                    },
+                    "industry": {
+                        "type": "string",
+                        "description": "The primary industry sector the company operates in."
+                    },
+                    "founded": {
+                        "type": "string",
+                        "description": "Year founded and by whom."
+                    },
+                    "employees": {
+                        "type": "integer",
+                        "description": "Number of employees."
+                    },
+                    "certifications": {
+                        "type": "string",
+                        "description": "ISO certifications the company holds."
+                    },
+                    "location": {
+                        "type": "string",
+                        "description": "The location of the company's current headquarters (City, Country)."
+                    },
+                    "mission": {
+                        "type": "string",
+                        "description": "Company mission statement."
+                    },
+                    "vision": {
+                        "type": "string",
+                        "description": "Company vision statement."
+                    },
+                    "industry_served": {
+                        "type": "string",
+                        "description": "The industries served by the company."
+                    },
+                    "logo": {
+                        "type": "string",
+                        "description": "URL to the company's official logo, preferably from the official website or Clearbit."
+                    }
+                },
+                "required": [
+                    "name",
+                    "website",
+                    "description",
+                    "industry",
+                    "founded",
+                    "employees",
+                    "certifications",
+                    "location",
+                    "mission",
+                    "vision",
+                    "industry_served",
+                    "logo"
+                ]
+            },
+            "geographic_presence": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "presence_type": {
+                            "type": "string",
+                            "description": "The type of presence (e.g., Corporate Offices, Manufacturing & Supply Chain, Retail Stores, Data centers, etc.)."
+                        },
+                        "locations": {
+                            "type": "string",
+                            "description": "The locations where the company has a presence."
+                        }
+                    },
+                    "required": [
+                        "presence_type",
+                        "locations"
+                    ]
+                }
+            },
+            "financial_highlights": {
+                "type": "object",
+                "properties": {
+                    "overview": {
+                        "type": "string",
+                        "description": "Summary of the company's financial performance over the last 5 years."
+                    },
+                    "metrics": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "year": {
+                                    "type": "string",
+                                    "description": "The financial year."
+                                },
+                                "ebit": {
+                                    "type": "string",
+                                    "description": "Earnings Before Interest and Taxes (EBIT) in USD (e.g., 1M for million, 1B for billion)."
+                                },
+                                "ebitda": {
+                                    "type": "string",
+                                    "description": "Earnings Before Interest, Taxes, Depreciation, and Amortization (EBITDA) in USD (e.g., 1M for million, 1B for billion)."
+                                },
+                                "revenue": {
+                                    "type": "string",
+                                    "description": "Annual revenue in USD (e.g., 1M for million, 1B for billion)."
+                                },
+                                "growth": {
+                                    "type": "string",
+                                    "format": "percentage",
+                                    "description": "Year-over-Year (YoY) growth percentage."
+                                },
+                                "gross_profit": {
+                                    "type": "string",
+                                    "description": "Gross profit in USD (e.g., 1M for million, 1B for billion)."
+                                },
+                                "net_profit": {
+                                    "type": "string",
+                                    "description": "Net profit in USD (e.g., 1M for million, 1B for billion)."
+                                },
+                                "total_assets": {
+                                    "type": "string",
+                                    "description": "Total assets in USD (e.g., 1M for million, 1B for billion)."
+                                },
+                                "market_cap": {
+                                    "type": "string",
+                                    "description": "Market capitalization in USD (e.g., 1M for million, 1B for billion)."
+                                },
+                                "ownership": {
+                                    "type": "string",
+                                    "description": "The ownership structure of the company."
+                                }
+                            },
+                            "required": [
+                                "year",
+                                "ebit",
+                                "ebitda",
+                                "revenue",
+                                "growth",
+                                "gross_profit",
+                                "net_profit",
+                                "total_assets",
+                                "market_cap",
+                                "ownership"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "overview",
+                    "metrics"
+                ]
+            },
+            "products_services": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "description": "Summary of the company's products and services."
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "The name of the product or service."
+                                },
+                                "category": {
+                                    "type": "string",
+                                    "description": "The category to which the product or service belongs."
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "A detailed description of the product or service."
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "category",
+                                "description"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "description",
+                    "items"
+                ]
+            },
+            "leadership": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "description": "Overview of the executive leadership team and key members (3-5 members)."
+                    },
+                    "members": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "The name of the executive."
+                                },
+                                "position": {
+                                    "type": "string",
+                                    "description": "The role of the executive (e.g., CEO, CFO)."
+                                },
+                                "bio": {
+                                    "type": "string",
+                                    "description": "A brief bio of the executive."
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "position",
+                                "bio"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "description",
+                    "members"
+                ]
+            },
+            "clients_competitors": {
+                "type": "object",
+                "properties": {
+                    "major_clients": {
+                        "type": "string",
+                        "description": "List of major clients and the products/services they use, along with a description."
+                    },
+                    "major_competitors": {
+                        "type": "string",
+                        "description": "List of major competitors with a description of each."
+                    }
+                },
+                "required": [
+                    "major_clients",
+                    "major_competitors"
+                ]
+            },
+            "strategic_priorities": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "description": "Overview of the company's strategic priorities and goals."
+                    },
+                    "objectives": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "The name of the objective."
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "Description of the objective."
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "description"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "description",
+                    "objectives"
+                ]
+            },
+            "key_events": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "description": "Significant achievements or major events in the last 3-5 years (e.g., mergers, demergers, acquisitions, expansions, product launches, exits, leadership changes)."
+                    },
+                    "events": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "date": {
+                                    "type": "string",
+                                    "format": "date",
+                                    "description": "The date of the event."
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "Description of the event."
+                                },
+                                "source": {
+                                    "type": "string",
+                                    "description": "Source URL of the information."
+                                }
+                            },
+                            "required": [
+                                "date",
+                                "description",
+                                "source"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "description",
+                    "events"
+                ]
+            },
+            "sources": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "description": "List of sources used (URLs, reports, company filings)."
+                }
+            }
+        },
+        "required": [
+            "overview",
+            "geographic_presence",
+            "financial_highlights",
+            "products_services",
+            "leadership",
+            "clients_competitors",
+            "strategic_priorities",
+            "key_events",
+            "sources"
+        ]
+    }
+}

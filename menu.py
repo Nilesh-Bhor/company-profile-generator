@@ -1,6 +1,5 @@
 import streamlit as st
 
-
 def show_menu():
     if st.session_state.is_shared_view:
         st.sidebar.page_link("pages/profile_view.py", label="📝 Profile")

@@ -64,7 +64,7 @@ if 'profile' in st.session_state and st.session_state.profile is not None:
         with col2:
             if st.button("💾 Save Changes", type="primary"):
                 st.session_state.profile = edited_markdown
-                company_profile = CompanyProfile(st.session_state.profile_data["company_overview"]["name"])
+                company_profile = CompanyProfile(st.session_state.profile_data["overview"]["name"])
                 company_profile.profile_data = st.session_state.profile_data
                 company_profile.update_profile_with_markdown(edited_markdown)
                 st.session_state.profile_data = company_profile.profile_data

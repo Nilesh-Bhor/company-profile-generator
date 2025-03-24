@@ -23,7 +23,7 @@ if shared_profile_id:
     
     if decoded_data:
         st.session_state.profile_data = decoded_data
-        company_profile = CompanyProfile(decoded_data["company_overview"]["name"])
+        company_profile = CompanyProfile(decoded_data["overview"]["name"])
         st.session_state.profile = company_profile.format_profile(decoded_data)
         st.session_state.profile_data = company_profile.profile_data
         st.session_state.ppt_buffer = company_profile.generate_ppt()
@@ -49,7 +49,7 @@ def create_download_buttons(include_share=True):
         left.download_button(
             label="Download PPT",
             data=st.session_state.ppt_buffer,
-            file_name=f"{st.session_state.profile_data['company_overview']['name']}_profile.pptx",
+            file_name=f"{st.session_state.profile_data['overview']['name']}_profile.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
     
@@ -58,7 +58,7 @@ def create_download_buttons(include_share=True):
         middle.download_button(
             label="Download PDF",
             data=st.session_state.pdf_buffer,
-            file_name=f"{st.session_state.profile_data['company_overview']['name']}_profile.pdf",
+            file_name=f"{st.session_state.profile_data['overview']['name']}_profile.pdf",
             mime="application/pdf"
         )
     
@@ -77,7 +77,7 @@ def display_profile(profile_content, company_name=None):
 
 if 'profile' in st.session_state and st.session_state.profile is not None:
     # Display the profile
-    display_profile(st.session_state.profile, st.session_state.profile_data["company_overview"]["name"])
+    display_profile(st.session_state.profile, st.session_state.profile_data["overview"]["name"])
     
     # Add download and share buttons
     create_download_buttons()

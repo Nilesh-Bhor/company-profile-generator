@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from utils.utility import get_logo
-from agents.agent_factory import AgentFactory, AgentType
+from agents import AgentFactory, AgentType
 
 class CompanyProfile:
     def __init__(self, company_name, company_website=None, agent_type=None):
@@ -29,78 +29,25 @@ class CompanyProfile:
         self.agent = AgentFactory.get_agent(agent_type)
     
 
-    def create_markdown(self):
+    def generate_markdown(self):
         markdown_text = ""
         try:
             if self.profile_data is not None:
                 # Company Overview
-                if 'company_overview' in self.profile_data:
-                    overview = self.profile_data['company_overview']
-            
-                company_name = overview.get('name', self.company_name)
-                logo_url = self.logo_url if self.logo is not None else overview['logo_url']
+                if 'overview' in self.profile_data:
+                    overview = self.profile_data['overview']
 
-                self.profile_data['company_overview']['logo_url'] = logo_url
-                
-                markdown_text += f"# <img src='{logo_url}' height='50' align='left' style='margin-right: 10px;'> {company_name} \n\n"
-                markdown_text += f"{overview.get('description', '')}\n\n"
-                
-                for key in ['industry', 'location', 'mission', 'vision']:
-                    if key in overview:
-                        markdown_text += f"* **{key.title()}**: {overview[key]}\n"
-                
-                markdown_text += "\n---\n\n"
-        
-                # Products and Services
-                if 'products_and_services' in self.profile_data:
-                    # Products
-                    if 'products' in self.profile_data['products_and_services']:
-                        markdown_text += "## Products\n\n"
-                        products = self.profile_data['products_and_services']['products']
-                        markdown_text += f"{products.get('description', '')}\n\n"
-                        for item in products.get('items', []):
-                            markdown_text += f"#### {item['name']}\n"
-                            markdown_text += f"{item['description']}\n\n"
-                            if 'features' in item:
-                                markdown_text += "**Key Features:**\n"
-                                for feature in item['features']:
-                                    markdown_text += f"* {feature}\n"
-                            markdown_text += "\n"
-                        
-                        markdown_text += "---\n\n"
+                    company_name = overview.get('name', self.company_name)
+                    logo_url = self.logo_url if self.logo is not None else overview['logo']
 
-                    # Services
-                    if 'services' in self.profile_data['products_and_services']:
-                        markdown_text += "## Services\n\n"
-                        services = self.profile_data['products_and_services']['services']
-                        markdown_text += f"{services.get('description', '')}\n\n"
-                        for item in services.get('items', []):
-                            markdown_text += f"#### {item['name']}\n"
-                            markdown_text += f"{item['description']}\n\n"
-                            if 'features' in item:
-                                markdown_text += "**Key Features:**\n"
-                                for feature in item['features']:
-                                    markdown_text += f"* {feature}\n"
-                            markdown_text += "\n"
-                        
-                        markdown_text += "---\n\n"
-
-                # Management Team
-                if 'management_team' in self.profile_data:
-                    markdown_text += "## Management Team\n\n"
-                    team = self.profile_data['management_team']
-                    markdown_text += f"{team.get('description', '')}\n\n"
-                    for member in team.get('members', []):
-                        markdown_text += f"#### {member['name']} - {member['position']}\n"
-                        markdown_text += f"{member['qualifications']}\n\n"
+                    self.profile_data['overview']['logo'] = logo_url
                     
-                    markdown_text += "---\n\n"
-                
-                # Milestones
-                if 'milestones' in self.profile_data and self.profile_data['milestones']:
-                    markdown_text += "## Key Milestones\n\n"
-                    for milestone in self.profile_data['milestones']:
-                        markdown_text += f"* **{milestone['date']}**: {milestone['description']}\n"
+                    markdown_text += f"# <img src='{logo_url}' height='50' align='left' style='margin-right: 10px;'> {company_name} \n\n"
+                    markdown_text += f"{overview.get('description', '')}\n\n"
+                    
+                    for key in ['mission', 'vision', 'founded', 'industry', 'location', 'employees', 'certifications']:
+                        if key in overview:
+                            markdown_text += f"* **{key.title()}**: {overview[key]}\n"
                     
                     markdown_text += "\n---\n\n"
                 
@@ -111,9 +58,81 @@ class CompanyProfile:
                     markdown_text += f"{financials.get('overview', '')}\n\n"
                     if 'metrics' in financials:
                         for metric in financials['metrics']:
-                            markdown_text += f"* **{metric['year']}**: Revenue {metric['revenue']}, Growth {metric['growth']}\n"
+                            markdown_text += f"* **{metric['year']}**:\n"
+                            markdown_text += f"  * **Revenue**: {metric['revenue']} \n"
+                            markdown_text += f"  * **Growth**: {metric['growth']} \n"
+                            markdown_text += f"  * **EBIT**: {metric['ebit']}\n "
+                            markdown_text += f"  * **EBITDA**: {metric['ebitda']} \n"
+                            markdown_text += f"  * **Gross Profit**: {metric['gross_profit']} \n"
+                            markdown_text += f"  * **Net Profit**: {metric['net_profit']} \n"
+                            markdown_text += f"  * **Total Assets**: {metric['total_assets']} \n"
+                            markdown_text += f"  * **Market Cap**: {metric['market_cap']} \n"
+                            # markdown_text += f"  * **Ownership**: {metric['ownership']} \n"
                     
                     markdown_text += "\n---\n"
+                
+                # Products and Services
+                if 'products_services' in self.profile_data:
+                    markdown_text += "## Products & Services\n\n"
+                    products_services = self.profile_data['products_services']
+                    markdown_text += f"{products_services.get('description', '')}\n\n"
+                    for item in products_services.get('items', []):
+                        markdown_text += f"#### {item['name']}\n"
+                        markdown_text += f"{item['description']}\n\n"
+                        markdown_text += "\n"
+                    
+                    markdown_text += "---\n\n"
+
+                # Geographic Presence
+                if 'geographic_presence' in self.profile_data:
+                    markdown_text += "## Geographic Presence\n\n"
+                    for presence in self.profile_data['geographic_presence']:
+                        markdown_text += f"* **{presence['presence_type']}**: {presence['locations']}\n"
+                    
+                    markdown_text += "\n---\n\n"
+
+                # Leadership
+                if 'leadership' in self.profile_data:
+                    markdown_text += "## Leadership Team\n\n"
+                    leadership = self.profile_data['leadership']
+                    markdown_text += f"{leadership.get('description', '')}\n\n"
+                    for member in leadership.get('members', []):
+                        markdown_text += f"#### {member['name']} - {member['position']}\n"
+                        markdown_text += f"{member['bio']}\n\n"
+                    
+                    markdown_text += "---\n\n"
+
+                # Strategic Priorities
+                if 'strategic_priorities' in self.profile_data:
+                    markdown_text += "## Strategic Priorities\n\n"
+                    strategic_priorities = self.profile_data['strategic_priorities']
+                    markdown_text += f"{strategic_priorities.get('description', '')}\n\n"
+                    for objective in strategic_priorities.get('objectives', []):
+                        markdown_text += f"* **{objective['name']}**: {objective['description']}\n"
+                    
+                    markdown_text += "\n---\n\n"
+                
+                # Clients and Competitors
+                if 'clients_competitors' in self.profile_data:
+                    markdown_text += "## Clients & Competitors\n\n"
+                    clients_competitors = self.profile_data['clients_competitors']
+                    if 'major_clients' in clients_competitors:
+                        markdown_text += f"### Major Clients\n\n{clients_competitors['major_clients']}\n\n"
+                    
+                    if 'major_competitors' in clients_competitors:
+                        markdown_text += f"### Major Competitors\n\n{clients_competitors['major_competitors']}\n\n"
+                    
+                    markdown_text += "\n---\n\n"
+
+                # Key Events
+                if 'key_events' in self.profile_data and self.profile_data['key_events']:
+                    markdown_text += "## Key Developments\n\n"
+                    key_events = self.profile_data['key_events']
+                    # markdown_text += f"{key_events.get('description', '')}\n\n"
+                    for event in key_events.get('events', []):
+                        markdown_text += f"* **{event['date']}**: {event['description']} (Source: {event['source']})\n"
+                    
+                    markdown_text += "\n---\n\n"
                 
                 # Sources
                 if 'sources' in self.profile_data:
@@ -122,7 +141,6 @@ class CompanyProfile:
                         markdown_text += f"* {source}\n"
                     
                     markdown_text += "\n---\n"
-
         except Exception as e:
             print(f"An error occurred while generating markdown: {str(e)}")
         
@@ -143,7 +161,7 @@ class CompanyProfile:
                 json_response = re.sub(r'^.*?```json\s*|\s*```$', '', json_response, flags=re.DOTALL)
 
                 self.profile_data = json.loads(json_response)
-                self.markdown_data = self.create_markdown()
+                self.markdown_data = self.generate_markdown()
 
             return self.markdown_data
         except Exception as e:
@@ -161,18 +179,18 @@ class CompanyProfile:
                 title_slide = prs.slides.add_slide(prs.slide_layouts[0])
                 
                 title = title_slide.shapes.title
-                company_name = self.profile_data['company_overview']['name'] if 'company_overview' in self.profile_data else self.company_name
+                company_name = self.profile_data['overview']['name'] if 'overview' in self.profile_data else self.company_name
                 title.text = company_name
 
                 subtitle = title_slide.placeholders[1]
-                company_site = self.profile_data['company_overview']['website'] if 'company_overview' in self.profile_data else self.company_website
+                company_site = self.profile_data['overview']['website'] if 'overview' in self.profile_data else self.company_website
                 subtitle.text = f"{company_site} \n\n Company Profile" if company_site else "Company Profile"
                 
                 logo = self.logo
                 if logo is None:
-                    if 'company_overview' in self.profile_data and 'logo_url' in self.profile_data['company_overview']:
+                    if 'overview' in self.profile_data and 'logo' in self.profile_data['overview']:
                         try:
-                            logo_url = self.profile_data['company_overview']['logo_url']
+                            logo_url = self.profile_data['overview']['logo']
                             logo = get_logo(logo_url)
                         except Exception as e:
                             print(f"Error adding logo: {str(e)}")
@@ -185,8 +203,8 @@ class CompanyProfile:
                     title_slide.shapes.add_picture(logo, left, top, width, height)
 
                 # Company Overview slide
-                if 'company_overview' in self.profile_data:
-                    overview = self.profile_data['company_overview']
+                if 'overview' in self.profile_data:
+                    overview = self.profile_data['overview']
 
                     slide = prs.slides.add_slide(prs.slide_layouts[1])
                     title = slide.shapes.title
@@ -202,122 +220,9 @@ class CompanyProfile:
                             p.text = f"{key.title()}: {overview[key]}"
                             p.font.size = Pt(14)
                             p.level = 0
-                
-                # Products and Services
-                if 'products_and_services' in self.profile_data:
-                    # Products slide
-                    if 'products' in self.profile_data['products_and_services']:
-                        products = self.profile_data['products_and_services']['products']
-                        slide = prs.slides.add_slide(prs.slide_layouts[1])
-                        title = slide.shapes.title
-                        title.text = "Products"
-                        
-                        content = slide.placeholders[1].text_frame
-                        p = content.paragraphs[0]
-                        p.text = products['description']
-                        p.font.size = Pt(14)
-
-                        for i, item in enumerate(products['items']):
-                            if i % 2 == 0 and i > 0:
-                                slide = prs.slides.add_slide(prs.slide_layouts[1])
-                                title = slide.shapes.title
-                                title.text = "Products"
-                                content = slide.placeholders[1].text_frame
-                                p = content.paragraphs[0]
-                            else:
-                                p = content.add_paragraph()
-
-                            p.text = f"{item['name']}: {item['description']}"
-                            p.font.size = Pt(14)
-                            p.level = 0
-
-                            if 'features' in item:
-                                p = content.add_paragraph()
-                                p.text = "Key Features:"
-                                p.font.size = Pt(14)
-                                p.level = 1
-                                for feature in item['features']:
-                                    p = content.add_paragraph() 
-                                    p.text = feature
-                                    p.font.size = Pt(14)
-                                    p.level = 2
-
-                    # Services slide
-                    if 'services' in self.profile_data['products_and_services']:
-                        services = self.profile_data['products_and_services']['services']
-                        slide = prs.slides.add_slide(prs.slide_layouts[1])
-                        title = slide.shapes.title
-                        title.text = "Services"
-                        
-                        content = slide.placeholders[1].text_frame  
-                        p = content.paragraphs[0]
-                        p.text = services['description']
-                        p.font.size = Pt(14)
-
-                        for i, item in enumerate(services['items']):
-                            if i % 2 == 0 and i > 0:
-                                slide = prs.slides.add_slide(prs.slide_layouts[1])
-                                title = slide.shapes.title
-                                title.text = "Services"
-                                content = slide.placeholders[1].text_frame
-                                p = content.paragraphs[0]
-                            else:
-                                p = content.add_paragraph()
-
-                            p.text = f"{item['name']}: {item['description']}"
-                            p.font.size = Pt(14)
-                            p.level = 0
-
-                            if 'features' in item:
-                                p = content.add_paragraph() 
-                                p.text = "Key Features:"
-                                p.font.size = Pt(14)
-                                p.level = 1
-                                for feature in item['features']:
-                                    p = content.add_paragraph()
-                                    p.text = feature
-                                    p.font.size = Pt(14)
-                                    p.level = 2
-                
-                # Management Team slide
-                if 'management_team' in self.profile_data:
-                    slide = prs.slides.add_slide(prs.slide_layouts[1])
-                    title = slide.shapes.title
-                    title.text = "Management Team"
                     
-                    content = slide.placeholders[1].text_frame
-                    team = self.profile_data['management_team']
-                    
-                    p = content.paragraphs[0]
-                    p.text = team['description']
-                    p.font.size = Pt(14)
-                    
-                    for member in team['members']:
-                        p = content.add_paragraph()
-                        p.text = f"{member['name']} - {member['position']}"
-                        p.font.size = Pt(14)
-                        p.level = 0
-                        
-                        p = content.add_paragraph()
-                        p.text = member['qualifications']
-                        p.font.size = Pt(14)
-                        p.level = 1
-                
-                # Milestones slide
-                if 'milestones' in self.profile_data and self.profile_data['milestones']:
-                    slide = prs.slides.add_slide(prs.slide_layouts[1])
-                    title = slide.shapes.title
-                    title.text = "Key Milestones"
+                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
 
-                    content = slide.placeholders[1].text_frame
-                    content.paragraphs[0].font.size = Pt(14)
-                    
-                    for milestone in self.profile_data['milestones']:
-                        p = content.add_paragraph()
-                        p.text = f"{milestone['date']}: {milestone['description']}"
-                        p.font.size = Pt(14)
-                        p.level = 0
-                
                 # Financial Highlights slide
                 if 'financial_highlights' in self.profile_data:
                     slide = prs.slides.add_slide(prs.slide_layouts[1])
@@ -336,8 +241,168 @@ class CompanyProfile:
                             p = content.add_paragraph()
                             p.text = f"{metric['year']}: Revenue {metric['revenue']}, Growth {metric['growth']}"
                             p.font.size = Pt(14)
-                            p.level = 1                
-                
+                            p.level = 1
+                    
+                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+
+                # Products and Services slide
+                if 'products_services' in self.profile_data:
+                    products_services = self.profile_data['products_services']
+                    slide = prs.slides.add_slide(prs.slide_layouts[1])
+                    title = slide.shapes.title
+                    title.text = "Products and Services"
+                    
+                    content = slide.placeholders[1].text_frame
+                    p = content.paragraphs[0]
+                    p.text = products_services['description']
+                    p.font.size = Pt(14)
+
+                    for item in products_services['items']:
+                        p = content.add_paragraph()
+                        p.text = f"{item['name']}: {item['description']}"
+                        p.font.size = Pt(14)
+                        p.level = 0
+
+                        if 'features' in item:
+                            p = content.add_paragraph()
+                            p.text = "Key Features:"
+                            p.font.size = Pt(14)
+                            p.level = 1
+                            for feature in item['features']:
+                                p = content.add_paragraph() 
+                                p.text = feature
+                                p.font.size = Pt(14)
+                                p.level = 2
+                    
+                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+
+                # Geographic Presence slide
+                if 'geographic_presence' in self.profile_data:
+                    slide = prs.slides.add_slide(prs.slide_layouts[1])
+                    title = slide.shapes.title
+                    title.text = "Geographic Presence"
+                    
+                    content = slide.placeholders[1].text_frame
+                    for presence in self.profile_data['geographic_presence']:
+                        p = content.add_paragraph()
+                        p.text = f"{presence['presence_type']}: {presence['locations']}"
+                        p.font.size = Pt(14)
+                        p.level = 0
+                    
+                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+
+                # Leadership slide
+                if 'leadership' in self.profile_data:
+                    slide = prs.slides.add_slide(prs.slide_layouts[1])
+                    title = slide.shapes.title
+                    title.text = "Leadership"
+                    
+                    content = slide.placeholders[1].text_frame
+                    leadership = self.profile_data['leadership']
+                    
+                    p = content.paragraphs[0]
+                    p.text = leadership['description']
+                    p.font.size = Pt(14)
+                    
+                    for member in leadership['members']:
+                        p = content.add_paragraph()
+                        p.text = f"{member['name']} - {member['position']}"
+                        p.font.size = Pt(14)
+                        p.level = 0
+                        
+                        p = content.add_paragraph()
+                        p.text = member['bio']
+                        p.font.size = Pt(14)
+                        p.level = 1
+                    
+                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+
+                # Strategic Priorities slide
+                if 'strategic_priorities' in self.profile_data:
+                    slide = prs.slides.add_slide(prs.slide_layouts[1])
+                    title = slide.shapes.title
+                    title.text = "Strategic Priorities"
+                    
+                    content = slide.placeholders[1].text_frame
+                    strategic_priorities = self.profile_data['strategic_priorities']
+                    
+                    p = content.paragraphs[0]
+                    p.text = strategic_priorities['description']
+                    p.font.size = Pt(14)
+                    
+                    for objective in strategic_priorities['objectives']:
+                        p = content.add_paragraph()
+                        p.text = f"{objective['name']}: {objective['description']}"
+                        p.font.size = Pt(14)
+                        p.level = 1
+                    
+                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+
+                # Clients and Competitors slide
+                if 'clients_competitors' in self.profile_data:
+                    slide = prs.slides.add_slide(prs.slide_layouts[1])
+                    title = slide.shapes.title
+                    title.text = "Clients & Competitors"
+                    
+                    content = slide.placeholders[1].text_frame
+                    clients_competitors = self.profile_data['clients_competitors']
+                    
+                    if 'major_clients' in clients_competitors:
+                        p = content.paragraphs[0]
+                        p.text = "Major Clients"
+                        p.font.size = Pt(14)
+                        
+                        p = content.add_paragraph()
+                        p.text = clients_competitors['major_clients']
+                        p.font.size = Pt(14)
+                        p.level = 1
+                    
+                    if 'major_competitors' in clients_competitors:
+                        p = content.add_paragraph()
+                        p.text = "Major Competitors"
+                        p.font.size = Pt(14)
+                        
+                        p = content.add_paragraph()
+                        p.text = clients_competitors['major_competitors']
+                        p.font.size = Pt(14)
+                        p.level = 1
+                    
+                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+
+                # Key Events slide
+                if 'key_events' in self.profile_data and self.profile_data['key_events']:
+                    slide = prs.slides.add_slide(prs.slide_layouts[1])
+                    title = slide.shapes.title
+                    title.text = "Key Events"
+
+                    content = slide.placeholders[1].text_frame
+                    key_events = self.profile_data['key_events']
+                    
+                    #p = content.paragraphs[0]
+                    #p.text = key_events['description']
+                    #p.font.size = Pt(14)
+                    
+                    for event in key_events['events']:
+                        p = content.add_paragraph()
+                        p.text = f"{event['date']}: {event['description']} (Source: {event['source']})"
+                        p.font.size = Pt(14)
+                        p.level = 1
+                    
+                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+
+                # Sources slide
+                if 'sources' in self.profile_data:
+                    slide = prs.slides.add_slide(prs.slide_layouts[1])
+                    title = slide.shapes.title
+                    title.text = "Sources"
+                    
+                    content = slide.placeholders[1].text_frame
+                    for source in self.profile_data['sources']:
+                        p = content.add_paragraph()
+                        p.text = source
+                        p.font.size = Pt(14)
+                        p.level = 0
+
                 # Save to bytes buffer
                 ppt_buffer = io.BytesIO()
                 prs.save(ppt_buffer)
@@ -384,7 +449,7 @@ class CompanyProfile:
     def format_profile(self, profile_data):
         """Format an existing profile from data"""
         self.profile_data = profile_data
-        self.markdown_data = self.create_markdown()
+        self.markdown_data = self.generate_markdown()
 
         return self.markdown_data
     

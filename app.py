@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from CompanyProfile import CompanyProfile
 
 # Load environment variables
-load_dotenv()
+load_dotenv('.env')
 
 # Initialize session state for page visibility if not exists
 if 'show_other_pages' not in st.session_state:
