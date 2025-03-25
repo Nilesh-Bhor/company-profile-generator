@@ -61,10 +61,7 @@ class FinancialDataFetcher:
                     "total_assets": balance_sheet.get('Total Assets').iloc[-(year+1)] if 'Total Assets' in balance_sheet else 0
                 }
             
-            return {
-                "info": info,
-                "metrics": metrics
-            }
+            return { "info": {}, "metrics": metrics }
         except Exception as e:
             print(f"Error fetching financial data for {self.company_name}: {e}")
             return None
@@ -98,15 +95,51 @@ class FinancialDataFetcher:
                     "total_assets": float(balance_sheet['totalAssets'][year]) if 'totalAssets' in balance_sheet else 0
                 }
             
-            return {
-                "info": {},
-                "metrics": metrics
-            }
+            return { "info": {}, "metrics": metrics }
         except Exception as e:
             print(f"Error fetching financial data for {self.company_name} from Alpha Vantage: {e}")
             return None
+
+    def _get_financial_data_fmp(self):
+        """
+        Fetches financial data for a given ticker symbol using Financial Modeling Prep API.
+
+        Returns:
+            dict: A dictionary containing financial data.
+        """
+        try:
+            API_KEY = os.getenv('FMP_API_KEY', '')
+            base_url = "https://financialmodelingprep.com/api/v3"
+
+            # Fetch financial statements
+            income_statement_url = f"{base_url}/income-statement/{self.company_symbol}?apikey={API_KEY}"            
+            income_statement_res = requests.get(income_statement_url)
+            
+            if income_statement_res.status_code != 200:
+                raise Exception(f"Failed to fetch financial data for {self.company_symbol} from FMP")
+            
+            income_statement = income_statement_res.json()
+            
+            # Extract required financial metrics for the last 5 years
+            metrics = {}
+            for year in range(5):
+                year_str = income_statement[year]['date'][:4]
+                metrics[year_str] = {
+                    "revenue": income_statement[year].get('revenue', 0),
+                    "ebit": income_statement[year].get('ebit', 0),
+                    "ebitda": income_statement[year].get('ebitda', 0),
+                    "gross_profit": income_statement[year].get('grossProfit', 0),
+                    "net_profit": income_statement[year].get('netIncome', 0),
+                    "market_cap": 0,  # FMP does not provide market cap in fundamental data
+                    "total_assets": 0 # use balance-sheet-statement api
+                }
+            
+            return { "info": {}, "metrics": metrics }
+        except Exception as e:
+            print(f"Error fetching financial data for {self.company_name} from FMP: {e}")
+            return None
         
-    def _format_value(self, value):
+    def _format_metric_value(self, value):
         """
         Converts a given metric value to a human-readable format.
 
@@ -114,60 +147,55 @@ class FinancialDataFetcher:
             str: A human-readable metric value.
         """
         if value >= 1e6:
-            return f"{value / 1e6:.2f}M"
-        elif value >= 1e9:
             return f"{value / 1e9:.2f}B"
         
-        return value
+        return f"{value / 1e6:.2f}M"
         
-    
-    def update_metrics(self, metrics):
-        for year in sorted(set(metrics.keys())):
+    def _update_metrics_value(self, metrics_data):
+        metrics={}
+        for year in sorted(set(metrics_data.keys())):
             prev_year = str(int(year) - 1)
-            revenue = metrics.get("revenue", 0)
+            year_metric = metrics_data[year]
+            revenue = year_metric.get("revenue", 0)
             
             metrics[year] = {
                 "t_revenue": revenue,
-                "revenue": self._format_value(revenue),
-                "ebit": self._format_value(metrics.get("ebit", 0)),
-                "ebitda": self._format_value(metrics.get("ebitda", 0)),
-                "gross_profit": self._format_value(metrics.get("gross_profit", 0)),
-                "net_profit": self._format_value(metrics.get("net_profit", 0)),
-                "market_cap": self._format_value(metrics.get("market_cap", 0)),
-                "total_assets": self._format_value(metrics.get("total_assets", 0))
+                "revenue": self._format_metric_value(revenue),
+                "ebit": self._format_metric_value(year_metric.get("ebit", 0)),
+                "ebitda": self._format_metric_value(year_metric.get("ebitda", 0)),
+                "gross_profit": self._format_metric_value(year_metric.get("gross_profit", 0)),
+                "net_profit": self._format_metric_value(year_metric.get("net_profit", 0)),
+                "market_cap": self._format_metric_value(year_metric.get("market_cap", 0)),
+                "total_assets": self._format_metric_value(year_metric.get("total_assets", 0))
             }
 
             if prev_year in metrics:
                 prev_revenue = metrics[prev_year]["t_revenue"]
-                metrics[year]["growth"] = ((revenue - prev_revenue) / prev_revenue) * 100 if prev_revenue != 0 else 0
+                metrics[year]["growth"] = f"{((revenue - prev_revenue) / prev_revenue) * 100:.2f}%" if prev_revenue != 0 else "0%"
 
         return metrics
     
-    def _merge_data(self, data_yfinance, data_alphavantage):
-        financial_data = {
-            "metrics": {},
-            "info": data_yfinance.get("info", {}) or data_alphavantage.get("info", {}),
-        }
-
-        years = sorted(set(data_yfinance["metrics"].keys()).union(set(data_alphavantage["metrics"].keys())))
+    def merge_metrics(self, yfinance_metrics, other_metrics):
+        metrics = {}
+        years = sorted(set(yfinance_metrics.keys()).union(set(other_metrics.keys())))
 
         for year in years:
-            yfinance_year = data_yfinance["metrics"].get(year, {})
-            alphavantage_year = data_alphavantage["metrics"].get(year, {})
+            yfinance_year = yfinance_metrics.get(year, {})
+            other_finance_year = other_metrics.get(year, {})
 
-            financial_data["metrics"][year] = {
-                "revenue": yfinance_year.get("revenue", 0) or alphavantage_year.get("revenue", 0),
-                "ebit": yfinance_year.get("ebit", 0) or alphavantage_year.get("ebit", 0),
-                "ebitda":  yfinance_year.get("ebitda", 0) or alphavantage_year.get("ebitda", 0),
-                "gross_profit": yfinance_year.get("gross_profit", 0) or alphavantage_year.get("gross_profit", 0),
-                "net_profit": yfinance_year.get("net_profit", 0) or alphavantage_year.get("net_profit", 0),
-                "market_cap": yfinance_year.get("market_cap", 0) or alphavantage_year.get("market_cap", 0),
-                "total_assets": yfinance_year.get("total_assets", 0) or alphavantage_year.get("total_assets", 0)
+            metrics[year] = {
+                "growth": yfinance_year.get("growth", "0%") if yfinance_year.get("growth", "0%") != "0%" else other_finance_year.get("growth", "0%")
             }
+            for key in ["revenue", "ebit", "ebitda", "gross_profit", "net_profit", "market_cap", "total_assets"]:
+                yfinance_value = yfinance_year.get(key, 0)
+                if isinstance(yfinance_value, str) and (yfinance_value.endswith('M') or yfinance_value.endswith('B')):
+                    metrics[year][key] = yfinance_value if float(yfinance_value[:-1]) > 0 else other_finance_year.get(key, 0)
+                else:
+                     metrics[year][key] = yfinance_value or other_finance_year.get(key, 0)
 
-        return financial_data
+        return metrics
         
-    def get_financial_data(self, use_alphavantage=False):
+    def get_financial_data(self, use_alphavantage=False, use_financial_modeling_prep=False):
         """
         Fetches financial data from yfinance if use_alphavantage set to False,
         otherwise fetches financial data from both yfinance and Alpha Vantage and merges them.
@@ -178,23 +206,31 @@ class FinancialDataFetcher:
         if not self.company_symbol:
             return None
 
-        data_yfinance = self._get_financial_data_yfinance()
-        if not use_alphavantage:
-            metrics = self.update_metrics(data_yfinance["metrics"])
-            data_yfinance["metrics"] = metrics
-            return data_yfinance
-        
-        if data_yfinance is None:
+        yfinance_data = self._get_financial_data_yfinance()
+        if yfinance_data is None:
             return None
         
-        financial_data = None
-        data_alphavantage = self._get_financial_data_alphavantage()
+        financial_data = {
+            "metrics": {},
+            "info": yfinance_data.get("info", {}),
+        }
 
-        if data_alphavantage and data_yfinance:
-            financial_data = self._merge_data(data_yfinance, data_alphavantage)
-            
-            metrics = self.update_metrics(financial_data["metrics"])
-            financial_data["metrics"] = metrics
-                
-        return financial_data
+        if use_alphavantage:
+            data_alphavantage = self._get_financial_data_alphavantage()
+            if data_alphavantage and yfinance_data:
+                metrics = self.merge_metrics(yfinance_data["metrics"], data_alphavantage["metrics"])
+                financial_data["metrics"] = self._update_metrics_value(metrics)
+
+                return financial_data
         
+        if use_financial_modeling_prep:
+            fmp_data = self._get_financial_data_fmp()
+            if fmp_data and yfinance_data:
+                metrics = self.merge_metrics(yfinance_data["metrics"], fmp_data['metrics'])
+                financial_data["metrics"] = self._update_metrics_value(metrics)
+
+                return financial_data
+        
+        financial_data["metrics"] = self._update_metrics_value(yfinance_data["metrics"])
+        return financial_data
+

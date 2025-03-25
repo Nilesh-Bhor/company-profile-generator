@@ -117,6 +117,31 @@ class CompanyProfile:
             Please provide a response in a structured JSON format that matches the following schema: {self.agent.schema}'
         """)
     
+    def _convert_profile_metrics(self, profile_metrics):
+        """
+        Converts profile metrics to the same format as financial_data metrics.
+
+        Args:
+            profile_metrics (dict): The profile metrics to convert.
+
+        Returns:
+            dict: The converted metrics.
+        """
+        converted_metrics = {}
+        for metric in profile_metrics:
+            year = metric['year']
+            converted_metrics[year] = {
+                "revenue": metric['revenue'],
+                "ebit": metric['ebit'],
+                "ebitda": metric['ebitda'],
+                "gross_profit": metric['gross_profit'],
+                "net_profit": metric['net_profit'],
+                "market_cap": metric['market_cap'],
+                "total_assets": metric['total_assets'],
+                "growth": metric['growth']
+            }
+        return converted_metrics
+
     def get_company_profile(self, fetch_finance_data=True):
         try:
             prompt = self._get_prompt()
@@ -132,10 +157,14 @@ class CompanyProfile:
                 if fetch_finance_data:
                     # Fetch financial data if available
                     data_fetcher = FinancialDataFetcher(self.company_name)
-                    financial_data = data_fetcher.get_financial_data(use_alphavantage=True)
+                    financial_data = data_fetcher.get_financial_data(use_financial_modeling_prep=True)
 
                     if financial_data is not None and 'metrics' in financial_data:
-                        profile['financial_highlights']['metrics'] = financial_data['metrics']                    
+                        # Convert profile metrics to the same format as financial_data metrics
+                        profile_metrics = self._convert_profile_metrics(profile['financial_highlights']['metrics'])
+                        
+                        metrics = data_fetcher.merge_metrics(financial_data['metrics'], profile_metrics)
+                        profile['financial_highlights']['metrics'] = metrics
 
                         if 'fullTimeEmployees' in financial_data['info']:
                             profile['overview']['employees'] = financial_data['info']['fullTimeEmployees']

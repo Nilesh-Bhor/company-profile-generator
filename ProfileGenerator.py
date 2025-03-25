@@ -49,8 +49,9 @@ class ProfileGenerator:
                     financials = self.profile_data['financial_highlights']
                     markdown_text += f"{financials.get('overview', '')}\n\n"
                     if 'metrics' in financials:
-                        for metric in financials['metrics']:
-                            markdown_text += f"* **{metric['year']}**:\n"
+                        for year in sorted(set(financials['metrics'].keys())):
+                            metric = financials['metrics'][year]
+                            markdown_text += f"* **{year}**:\n"
                             markdown_text += f"  * **Revenue**: {metric['revenue']} \n"
                             markdown_text += f"  * **Growth**: {metric['growth']} \n"
                             markdown_text += f"  * **EBIT**: {metric['ebit']}\n "
