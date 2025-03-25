@@ -12,18 +12,10 @@ class GoogleGeminiAgent(BaseAgent):
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
         self.client = genai.Client(api_key=GOOGLE_API_KEY)
 
-    def generate_content(self, prompt: str) -> str:
+    def generate_content(self, context: str, prompt: str) -> str:
         optimized_prompt = f"""
             {prompt}
-            
-            ### CONTEXT ###
-            We want to dynamically create a company profile with all needed information.
-            **Yahoo Finance**, Crunchbase, S&P Capital IQ, and other financial databases are good sources for financial information.
-            Company websites, press releases, and news articles are good sources for general information.
-            Local newspapers, government websites, and industry-specific websites are good sources for local information.
-             ***IMPORTANT - Please ensure all data is accurate, up-to-date, and include sources.*** \n
-
-            Please provide a response in a structured JSON format that matches the following schema: {self.schema}'
+            {context}
         """
         response = self.client.models.generate_content(
             model=self.model_name,

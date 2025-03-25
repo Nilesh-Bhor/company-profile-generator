@@ -1,7 +1,7 @@
 import menu
 import streamlit as st
 from dotenv import load_dotenv
-from CompanyProfile import CompanyProfile
+from ProfileGenerator import ProfileGenerator
 
 # Load environment variables
 load_dotenv('.env')
@@ -47,11 +47,11 @@ with st.container():
             st.session_state.company_name = company_name
             clear_session_state()
             with st.spinner("Generating company profile..."):
-                company_profile = CompanyProfile(company_name, company_website)
-                st.session_state.profile = company_profile.get_company_profile()
-                st.session_state.profile_data = company_profile.profile_data
-                st.session_state.ppt_buffer = company_profile.generate_ppt()
-                st.session_state.pdf_buffer = company_profile.generate_pdf()
+                profile_generator = ProfileGenerator(company_name, company_website)
+                st.session_state.profile = profile_generator.generate_profile()
+                st.session_state.profile_data = profile_generator.profile_data
+                st.session_state.ppt_buffer = profile_generator.generate_ppt()
+                st.session_state.pdf_buffer = profile_generator.generate_pdf()
                 # Show other pages after profile generation
                 st.session_state.show_other_pages = True
                 # Redirect to profile view

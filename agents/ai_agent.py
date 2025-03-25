@@ -7,7 +7,7 @@ class AgentType(Enum):
     GOOGLE_GEMINI = "google_gemini"
     OPENAI = "openai"
 
-class AgentFactory:
+class AIAgent:
     @staticmethod
     def get_agent(agent_type: AgentType) -> BaseAgent:
         if agent_type == AgentType.GOOGLE_GEMINI:
