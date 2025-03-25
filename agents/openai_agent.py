@@ -12,7 +12,7 @@ class OpenAIAgent(BaseAgent):
         OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
         self.client = OpenAI(api_key=OPENAI_API_KEY)
 
-    def generate_content(self, prompt: str) -> str:
+    def generate_content(self, context: str, prompt: str) -> str:
         messages = [
             {
                 "role": "system", 
@@ -23,26 +23,7 @@ class OpenAIAgent(BaseAgent):
                 "content": [
                     {
                         "type": "text",
-                        "text": (
-                            """
-                            ### CONTEXT ###
-                            We aim to dynamically generate a comprehensive company profile with accurate, up-to-date information. The data should be sourced from reliable financial databases, official company communications, and credible industry sources to ensure accuracy and credibility.
-                            """
-                            """
-                            ### **Primary Data Sources:**  
-                            - **Financial Information:** Yahoo Finance, Crunchbase, S&P Capital IQ, Bloomberg, annual reports, and investor relations websites.  
-                            - **General Company Information:** Official company websites, press releases, news articles, and corporate filings.  
-                            - **Geographic and Local Data:** Government websites, local newspapers, industry-specific websites, and regulatory filings.  
-                            """
-                            """
-                            ### **Critical Requirements:**  
-                            - Ensure **accuracy and cross-verification** of financial data.  
-                            - Provide **source attribution** for key figures and statements.  
-                            - Use **latest available data** (e.g., last 5 fiscal years for financials).  
-                            - Include **key strategic initiatives and major corporate events** from the past 3-5 years.  
-                            - Cover **market position, competitive landscape, and client base** where relevant.  
-                            """
-                        ),
+                        "text": context,
                     },
                     {
                         "type": "text",

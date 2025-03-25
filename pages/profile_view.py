@@ -1,7 +1,7 @@
 import menu
 import streamlit as st
 import styles.styles as cssStyles
-from CompanyProfile import CompanyProfile
+from ProfileGenerator import ProfileGenerator
 from utils.database import save_profile_data, load_profile_data
 
 def clear_session_state():
@@ -23,11 +23,11 @@ if shared_profile_id:
     
     if decoded_data:
         st.session_state.profile_data = decoded_data
-        company_profile = CompanyProfile(decoded_data["overview"]["name"])
-        st.session_state.profile = company_profile.format_profile(decoded_data)
-        st.session_state.profile_data = company_profile.profile_data
-        st.session_state.ppt_buffer = company_profile.generate_ppt()
-        st.session_state.pdf_buffer = company_profile.generate_pdf()
+        profile_generator = ProfileGenerator(decoded_data["overview"]["name"])
+        st.session_state.profile = profile_generator.format_profile(decoded_data)
+        st.session_state.profile_data = profile_generator.profile_data
+        st.session_state.ppt_buffer = profile_generator.generate_ppt()
+        st.session_state.pdf_buffer = profile_generator.generate_pdf()
         st.session_state.is_shared_view = True
     else:
         st.error("Invalid shared profile data")

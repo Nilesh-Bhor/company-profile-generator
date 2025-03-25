@@ -8,3 +8,5 @@ python-pptx
 python-dotenv
 google-genai
 googlesearch-python
+yfinance
+alpha_vantage

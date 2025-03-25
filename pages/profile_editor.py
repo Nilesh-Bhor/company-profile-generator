@@ -1,7 +1,7 @@
 import menu
 import streamlit as st
 import styles.styles as cssStyles
-from CompanyProfile import CompanyProfile
+from ProfileGenerator import ProfileGenerator
 
 # Check if pages should be shown
 if not st.session_state.get('show_other_pages', False):
@@ -64,12 +64,15 @@ if 'profile' in st.session_state and st.session_state.profile is not None:
         with col2:
             if st.button("💾 Save Changes", type="primary"):
                 st.session_state.profile = edited_markdown
-                company_profile = CompanyProfile(st.session_state.profile_data["overview"]["name"])
-                company_profile.profile_data = st.session_state.profile_data
-                company_profile.update_profile_with_markdown(edited_markdown)
-                st.session_state.profile_data = company_profile.profile_data
-                st.session_state.ppt_buffer = company_profile.generate_ppt()
-                st.session_state.pdf_buffer = company_profile.generate_pdf()
+                
+                profile_generator = ProfileGenerator(st.session_state.profile_data["overview"]["name"])
+                profile_generator.profile_data = st.session_state.profile_data
+                profile_generator.update_profile_with_markdown(edited_markdown)
+                
+                st.session_state.profile_data = profile_generator.profile_data
+                st.session_state.ppt_buffer = profile_generator.generate_ppt()
+                st.session_state.pdf_buffer = profile_generator.generate_pdf()
+                
                 st.success("✅ Profile updated successfully!")
                 st.rerun()
 
