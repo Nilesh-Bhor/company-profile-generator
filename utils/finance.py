@@ -4,9 +4,12 @@ import requests
 from alpha_vantage.fundamentaldata import FundamentalData
 
 class FinancialDataFetcher:
-    def __init__(self, company_name):
+    def __init__(self, company_name=None, company_symbol=None):
         self.company_name = company_name
-        self.company_symbol = self._get_company_symbol()
+        self.company_symbol = company_symbol
+        
+        if self.company_symbol is None:
+            self._get_company_symbol()
 
     def _get_company_symbol(self):
         """

@@ -4,11 +4,11 @@ import io
 import json
 import pdfkit
 import markdown
-import CompanyProfile
 from bs4 import BeautifulSoup
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from utils.utility import get_logo
+from CompanyProfile import CompanyProfile
 
 class ProfileGenerator:
     def __init__(self, company_name, company_website=None):

@@ -10,13 +10,13 @@ if __name__ == "__main__":
     load_dotenv('.env')
     
     async def main():
-        company_name = "Oracle"
+        company_name = "Yahoo Inc"
         
-        # profile = CompanyProfile(company_name=company_name) 
-        profile = FinancialDataFetcher(company_name=company_name)
+        profile = CompanyProfile(company_name=company_name) 
+        # profile = FinancialDataFetcher(company_name=company_name)
 
-        # data = profile.get_company_profile(fetch_finance_data=True)
-        data = profile.get_financial_data(use_financial_modeling_prep=False)
+        data = profile.get_company_profile(fetch_finance_data=True)
+        # data = profile.get_financial_data(use_financial_modeling_prep=False)
 
         if data:
             print(f"Data: \n {json.dumps(data, indent=2)}")

@@ -54,6 +54,10 @@
                     "logo": {
                         "type": "string",
                         "description": "URL to the company's official logo, preferably from the official website or Clearbit."
+                    },
+                    "symbol": {
+                        "type": "string",
+                        "description": "stock symbol of the company."
                     }
                 },
                 "required": [
@@ -68,7 +72,8 @@
                     "mission",
                     "vision",
                     "industry_served",
-                    "logo"
+                    "logo",
+                    "symbol"
                 ]
             },
             "geographic_presence": {

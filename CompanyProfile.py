@@ -43,6 +43,7 @@ class CompanyProfile:
         - **Number of Employees:** Total number employees as of {current_year}.  
         - **Certifications:** List ISO certifications (if applicable).  
         - **Industries Served:** Key industries the company caters to.  
+        - **Stock Symbol:** Stock Symbol 
 
         ### **Geographic Presence:**  
         - **List of Locations:** Include manufacturing sites, sales offices, corporate headquarters, and other key operational locations.  
@@ -154,15 +155,17 @@ class CompanyProfile:
                 json_response = re.sub(r'^.*?```json\s*|\s*```$', '', json_response, flags=re.DOTALL)
                 profile = json.loads(json_response)
 
+                # Convert profile metrics to the same format as financial_data metrics
+                profile_metrics = self._convert_profile_metrics(profile['financial_highlights']['metrics'])
+                profile['financial_highlights']['metrics'] = profile_metrics
+
                 if fetch_finance_data:
                     # Fetch financial data if available
-                    data_fetcher = FinancialDataFetcher(self.company_name)
+                    company_name = profile['overview']['name']
+                    data_fetcher = FinancialDataFetcher(company_name=company_name)
                     financial_data = data_fetcher.get_financial_data(use_financial_modeling_prep=True)
 
                     if financial_data is not None and 'metrics' in financial_data:
-                        # Convert profile metrics to the same format as financial_data metrics
-                        profile_metrics = self._convert_profile_metrics(profile['financial_highlights']['metrics'])
-                        
                         metrics = data_fetcher.merge_metrics(financial_data['metrics'], profile_metrics)
                         profile['financial_highlights']['metrics'] = metrics
 
@@ -172,6 +175,9 @@ class CompanyProfile:
                         if 'city' in financial_data['info'] and 'state' in financial_data['info'] and 'country' in financial_data['info']:
                             if financial_data['info']['city'] not in profile['overview']['location']:
                                 profile['overview']['location'] = f"{financial_data['info']['city']}, {financial_data['info']['state']}, {financial_data['info']['country']}"
+                        
+                        if 'https://finance.yahoo.com' not in profile['sources']:
+                            profile['sources'].append('https://finance.yahoo.com')
                 
                 return profile
 
