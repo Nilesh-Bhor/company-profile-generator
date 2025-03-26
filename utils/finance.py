@@ -9,7 +9,7 @@ class FinancialDataFetcher:
         self.company_symbol = company_symbol
         
         if self.company_symbol is None:
-            self._get_company_symbol()
+            self.company_symbol = self._get_company_symbol()
 
     def _get_company_symbol(self):
         """
@@ -64,7 +64,7 @@ class FinancialDataFetcher:
                     "total_assets": balance_sheet.get('Total Assets').iloc[-(year+1)] if 'Total Assets' in balance_sheet else 0
                 }
             
-            return { "info": {}, "metrics": metrics }
+            return { "info": info, "metrics": metrics }
         except Exception as e:
             print(f"Error fetching financial data for {self.company_name}: {e}")
             return None

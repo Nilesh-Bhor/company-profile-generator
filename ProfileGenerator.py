@@ -16,10 +16,6 @@ class ProfileGenerator:
         self.markdown_data = None
         self.company_name = company_name
         self.company_website = company_website
-        logo_name = company_name.lower().replace(' ', '').replace('.', '')
-        self.logo_url = f"https://logo.clearbit.com/{logo_name}.com"
-        self.logo = get_logo(self.logo_url)
-    
 
     def generate_markdown(self):
         markdown_text = ""
@@ -30,11 +26,8 @@ class ProfileGenerator:
                     overview = self.profile_data['overview']
 
                     company_name = overview.get('name', self.company_name)
-                    logo_url = self.logo_url if self.logo is not None else overview['logo']
-
-                    self.profile_data['overview']['logo'] = logo_url
                     
-                    markdown_text += f"# <img src='{logo_url}' height='50' align='left' style='margin-right: 10px;'> {company_name} \n\n"
+                    markdown_text += f"# <img src='{overview['logo']}' height='50' align='left' style='margin-right: 10px;'> {company_name} \n\n"
                     markdown_text += f"{overview.get('description', '')}\n\n"
                     
                     for key in ['mission', 'vision', 'founded', 'industry', 'location', 'employees', 'certifications']:
@@ -170,15 +163,11 @@ class ProfileGenerator:
                 company_site = self.profile_data['overview']['website'] if 'overview' in self.profile_data else self.company_website
                 subtitle.text = f"{company_site} \n\n Company Profile" if company_site else "Company Profile"
                 
-                logo = self.logo
-                if logo is None:
-                    if 'overview' in self.profile_data and 'logo' in self.profile_data['overview']:
-                        try:
-                            logo_url = self.profile_data['overview']['logo']
-                            logo = get_logo(logo_url)
-                        except Exception as e:
-                            print(f"Error adding logo: {str(e)}")
-                
+                logo = None
+                if 'overview' in self.profile_data and 'logo' in self.profile_data['overview']:
+                    logo_url = self.profile_data['overview']['logo']
+                    logo = get_logo(logo_url)
+                    
                 if logo is not None:
                     left = Inches(4)  # Center position
                     top = Inches(0.5)  # Adjusted top position

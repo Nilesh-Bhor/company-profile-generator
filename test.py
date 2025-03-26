@@ -10,7 +10,7 @@ if __name__ == "__main__":
     load_dotenv('.env')
     
     async def main():
-        company_name = "Yahoo Inc"
+        company_name = "Oracle"
         
         profile = CompanyProfile(company_name=company_name) 
         # profile = FinancialDataFetcher(company_name=company_name)

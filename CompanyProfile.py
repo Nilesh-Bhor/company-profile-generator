@@ -2,6 +2,7 @@ import re
 import os
 import json
 from datetime import datetime
+from utils.utility import get_logo
 from agents import AIAgent, AgentType
 from utils.finance import FinancialDataFetcher
 
@@ -64,7 +65,7 @@ class CompanyProfile:
         - List the company’s major and most popular products/services. Provide a 1-2 line description for each.  
 
         ### **Leadership Team:**  
-        - Provide names and titles of the current top 5 executives (e.g., CEO, CFO, COO, CTO, etc.). Exclude former executives.
+        - Provide names and titles of the top key 5 executives of company as of {current_year} (e.g. Chairman, Vice Chairman, CTO, CEO, CFO, COO, etc.). Exclude former executives.
 
         ### **Clients & Competitors:**  
         - **Major Clients:** Key customers or business partners.  
@@ -143,6 +144,16 @@ class CompanyProfile:
             }
         return converted_metrics
 
+    def _get_logo(self, website, fallback_logo=None):
+        domain = re.sub(r'^https?://(www\.)?', '', website).split('/')[0]
+        logo_url = f"https://logo.clearbit.com/{domain}"
+        
+        logo = get_logo(logo_url)
+        if logo:
+            return logo_url
+
+        return fallback_logo
+
     def get_company_profile(self, fetch_finance_data=True):
         try:
             prompt = self._get_prompt()
@@ -158,6 +169,11 @@ class CompanyProfile:
                 # Convert profile metrics to the same format as financial_data metrics
                 profile_metrics = self._convert_profile_metrics(profile['financial_highlights']['metrics'])
                 profile['financial_highlights']['metrics'] = profile_metrics
+
+                # update logo if found in clearbit
+                website = profile['overview']['website']
+                logo = profile['overview']['logo']
+                profile['overview']['logo'] = self._get_logo(website, logo)
 
                 if fetch_finance_data:
                     # Fetch financial data if available
