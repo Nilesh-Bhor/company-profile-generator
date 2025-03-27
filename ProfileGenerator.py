@@ -30,9 +30,12 @@ class ProfileGenerator:
                     markdown_text += f"# <img src='{overview['logo']}' height='50' align='left' style='margin-right: 10px;'> {company_name} \n\n"
                     markdown_text += f"{overview.get('description', '')}\n\n"
                     
-                    for key in ['mission', 'vision', 'founded', 'industry', 'location', 'employees', 'certifications']:
+                    for key in ['mission', 'vision', 'founded', 'industry', 'location', 'website', 'employees', 'certifications']:
                         if key in overview:
-                            markdown_text += f"* **{key.title()}**: {overview[key]}\n"
+                            if key == 'website':
+                                markdown_text += f"* **{key.title()}**: [{overview[key]}]({overview[key]})\n"
+                            else:
+                                markdown_text += f"* **{key.title()}**: {overview[key]}\n"
                     
                     markdown_text += "\n---\n\n"
                 
@@ -187,10 +190,13 @@ class ProfileGenerator:
                     p.text = overview['description']
                     p.font.size = Pt(14)
                     
-                    for key in ['industry', 'location', 'mission', 'vision']:
+                    for key in ['mission', 'vision', 'founded', 'industry', 'location', 'website', 'employees', 'certifications']:
                         if key in overview:
                             p = content.add_paragraph()
-                            p.text = f"{key.title()}: {overview[key]}"
+                            if key == 'website':
+                                p.text = f"{key.title()}: {overview[key]} ({overview[key]})"
+                            else:
+                                p.text = f"{key.title()}: {overview[key]}"
                             p.font.size = Pt(14)
                             p.level = 0
                     
@@ -201,22 +207,68 @@ class ProfileGenerator:
                     slide = prs.slides.add_slide(prs.slide_layouts[1])
                     title = slide.shapes.title
                     title.text = "Financial Highlights"
-                    
+
                     content = slide.placeholders[1].text_frame
                     financials = self.profile_data['financial_highlights']
-                    
-                    p = content.paragraphs[0]
-                    p.text = financials['overview']
-                    p.font.size = Pt(14)
-                    
+
+                    # Add financial overview
+                    if 'overview' in financials:
+                        p = content.paragraphs[0]
+                        p.text = financials['overview']
+                        p.font.size = Pt(14)
+
+                    # Add financial metrics for each year
                     if 'metrics' in financials:
-                        for metric in financials['metrics']:
+                        for year in sorted(financials['metrics'].keys()):
+                            metric = financials['metrics'][year]
                             p = content.add_paragraph()
-                            p.text = f"{metric['year']}: Revenue {metric['revenue']}, Growth {metric['growth']}"
+                            p.text = f"{year}:"
                             p.font.size = Pt(14)
+                            p.level = 0
+
+                            # Add detailed financial metrics
+                            p = content.add_paragraph()
+                            p.text = f"Revenue: {metric.get('revenue', 'N/A')}"
+                            p.font.size = Pt(12)
                             p.level = 1
-                    
-                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+
+                            p = content.add_paragraph()
+                            p.text = f"Growth: {metric.get('growth', 'N/A')}"
+                            p.font.size = Pt(12)
+                            p.level = 1
+
+                            p = content.add_paragraph()
+                            p.text = f"EBIT: {metric.get('ebit', 'N/A')}"
+                            p.font.size = Pt(12)
+                            p.level = 1
+
+                            p = content.add_paragraph()
+                            p.text = f"EBITDA: {metric.get('ebitda', 'N/A')}"
+                            p.font.size = Pt(12)
+                            p.level = 1
+
+                            p = content.add_paragraph()
+                            p.text = f"Gross Profit: {metric.get('gross_profit', 'N/A')}"
+                            p.font.size = Pt(12)
+                            p.level = 1
+
+                            p = content.add_paragraph()
+                            p.text = f"Net Profit: {metric.get('net_profit', 'N/A')}"
+                            p.font.size = Pt(12)
+                            p.level = 1
+
+                            p = content.add_paragraph()
+                            p.text = f"Total Assets: {metric.get('total_assets', 'N/A')}"
+                            p.font.size = Pt(12)
+                            p.level = 1
+
+                            p = content.add_paragraph()
+                            p.text = f"Market Cap: {metric.get('market_cap', 'N/A')}"
+                            p.font.size = Pt(12)
+                            p.level = 1
+
+                    # Add a blank slide for separation
+                    prs.slides.add_slide(prs.slide_layouts[5])
 
                 # Products and Services slide
                 if 'products_services' in self.profile_data:
@@ -436,4 +488,4 @@ class ProfileGenerator:
         # of the profile_data if needed. For now, we'll just keep the markdown updated
         # and regenerate PPT/PDF with the new content
         return self.profile
-    
+
