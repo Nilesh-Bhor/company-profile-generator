@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from utils.utility import get_logo
+from core.settings import Settings
 from CompanyProfile import CompanyProfile
 
 class ProfileGenerator:
@@ -442,7 +443,7 @@ class ProfileGenerator:
     def generate_pdf(self):
         try:
             if self.markdown_data is not None:
-                wkhtmltopdf_path = os.getenv('WKHTMLTOPDF_PATH')
+                wkhtmltopdf_path = Settings.WKHTMLTOPDF_PATH
                 config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
                 # Convert markdown to HTML

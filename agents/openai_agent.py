@@ -1,16 +1,16 @@
 import os
 import json
+import requests
 from openai import OpenAI
+from core.settings import Settings
 from agents.base_agent import BaseAgent
 
-class OpenAIAgent(BaseAgent):
-    def __init__(self, model_name: str = "gpt-4o-mini"):
-        super().__init__(model_name)
-        self.initialize_client()
 
-    def initialize_client(self):
-        OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-        self.client = OpenAI(api_key=OPENAI_API_KEY)
+class OpenAIAgent(BaseAgent):
+    def __init__(self, model_name: str = "gpt-4o-mini", use_perplexity: bool = False):
+        super().__init__(model_name)
+        self.use_perplexity = use_perplexity
+    
 
     def generate_content(self, context: str, prompt: str) -> str:
         messages = [
@@ -32,16 +32,23 @@ class OpenAIAgent(BaseAgent):
                 ]
             }
         ]
+        
+        if self.use_perplexity:
+            return self.fetch_from_perplexity(context, prompt)
+        else:
+            return self.fetch_from_openai(context, prompt)
+
+    def fetch_from_openai(self, messages) -> str:
+        self.client = OpenAI(api_key=Settings.OPENAI_API_KEY)
     
         # Call the OpenAI ChatCompletion API
         response = self.client.chat.completions.create(
-            model = self.model_name,
-            messages = messages,
-            top_p = 1,
-            presence_penalty = 0,
-            frequency_penalty = 0,
-            temperature = 0,
-            response_format = {
+            model=self.model_name,
+            messages=messages,
+            presence_penalty=0,
+            frequency_penalty=0,
+            temperature=0,
+            response_format={
                 "type": "json_schema",
                 "json_schema": json.loads(self.schema),
             }
@@ -50,3 +57,27 @@ class OpenAIAgent(BaseAgent):
         # Extract the summary from the response
         summary = response.choices[0].message.content.strip()
         return summary
+
+    def fetch_from_perplexity(self, messages) -> str:
+        url = "https://api.perplexity.ai/v1/query"
+        headers = {
+            "Authorization": f"Bearer {Settings.PERPLEXITY_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": self.model_name,
+            "temperature": 0,
+            "stream": False,
+            "messages": messages,
+            "web_search_options": {"search_context_size": "high"},
+            "response_format" : {
+                "type": "json_schema",
+                "json_schema": json.loads(self.schema),
+            }
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code == 200:
+            return response.json().get("response", "").strip()
+        else:
+            raise Exception(f"Perplexity API Error: {response.status_code} - {response.text}")
