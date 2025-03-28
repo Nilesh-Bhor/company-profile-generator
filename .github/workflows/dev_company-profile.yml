@@ -78,4 +78,9 @@ jobs:
         with:
           app-name: 'company-profile'
           slot-name: 'Production'
+
+      - name: Start Streamlit App
+        run: |
+          source venv/bin/activate
+          streamlit run app.py --server.port 8000 --server.address 0.0.0.0
           
