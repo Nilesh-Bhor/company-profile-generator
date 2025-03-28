@@ -73,10 +73,3 @@ jobs:
         with:
           app-name: 'company-profile'
           slot-name: 'Production'
-
-      - name: Start Streamlit App
-        run: |
-          python -m venv venv  # Ensure virtual environment is created
-          source venv/bin/activate
-          pip install -r requirements.txt  # Reinstall dependencies if needed
-          streamlit run app.py --server.port 8000 --server.address 0.0.0.0

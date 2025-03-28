@@ -34,9 +34,9 @@ class OpenAIAgent(BaseAgent):
         ]
         
         if self.use_perplexity:
-            return self.fetch_from_perplexity(context, prompt)
+            return self.fetch_from_perplexity(messages)
         else:
-            return self.fetch_from_openai(context, prompt)
+            return self.fetch_from_openai(messages)
 
     def fetch_from_openai(self, messages) -> str:
         self.client = OpenAI(api_key=Settings.OPENAI_API_KEY)
@@ -78,6 +78,8 @@ class OpenAIAgent(BaseAgent):
 
         response = requests.post(url, headers=headers, json=payload)
         if response.status_code == 200:
-            return response.json().get("response", "").strip()
+            choices = response.json().get("choices")
+            message = choices[0].get("message", "")
+            return message.get("content").strip()
         else:
             raise Exception(f"Perplexity API Error: {response.status_code} - {response.text}")
