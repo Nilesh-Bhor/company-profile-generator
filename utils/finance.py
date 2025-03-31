@@ -1,6 +1,7 @@
 import os
-import yfinance as yf
 import requests
+import yfinance as yf
+from core.settings import Settings
 from alpha_vantage.fundamentaldata import FundamentalData
 
 class FinancialDataFetcher:
@@ -77,8 +78,7 @@ class FinancialDataFetcher:
             dict: A dictionary containing financial data.
         """
         try:
-            API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY', '')
-            fundamentel_data = FundamentalData(API_KEY)
+            fundamentel_data = FundamentalData(Settings.ALPHA_VANTAGE_API_KEY)
             
             # Fetch financial statements
             income_statement, _ = fundamentel_data.get_income_statement_annual(self.company_symbol)
@@ -111,11 +111,10 @@ class FinancialDataFetcher:
             dict: A dictionary containing financial data.
         """
         try:
-            API_KEY = os.getenv('FMP_API_KEY', '')
             base_url = "https://financialmodelingprep.com/api/v3"
 
             # Fetch financial statements
-            income_statement_url = f"{base_url}/income-statement/{self.company_symbol}?apikey={API_KEY}"            
+            income_statement_url = f"{base_url}/income-statement/{self.company_symbol}?apikey={Settings.FMP_API_KEY}"            
             income_statement_res = requests.get(income_statement_url)
             
             if income_statement_res.status_code != 200:

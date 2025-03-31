@@ -1,6 +1,7 @@
 import os
 from google import genai
 from google.genai import types
+from core.settings import Settings
 from agents.base_agent import BaseAgent
 
 class GoogleGeminiAgent(BaseAgent):
@@ -9,8 +10,7 @@ class GoogleGeminiAgent(BaseAgent):
         self.initialize_client()
     
     def initialize_client(self):
-        GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-        self.client = genai.Client(api_key=GOOGLE_API_KEY)
+        self.client = genai.Client(api_key=Settings.GOOGLE_API_KEY)
 
     def generate_content(self, context: str, prompt: str) -> str:
         optimized_prompt = f"""

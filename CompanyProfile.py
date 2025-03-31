@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from utils.utility import get_logo
 from agents import AIAgent, AgentType
+from core.settings import Settings
 from utils.finance import FinancialDataFetcher
 
 class CompanyProfile:
@@ -17,7 +18,7 @@ class CompanyProfile:
     def _initialize_agent(self):
         if self.agent_type is None:
             # Get agent type from environment variable
-            agent_type_str = os.getenv('AGENT_TYPE', 'GOOGLE_GEMINI')
+            agent_type_str = Settings.AGENT_TYPE
             self.agent_type = AgentType[agent_type_str] if agent_type_str in AgentType.__members__ else AgentType.GOOGLE_GEMINI
         
         # Configure the agent
@@ -172,7 +173,7 @@ class CompanyProfile:
 
                 # update logo if found in clearbit
                 website = profile['overview']['website']
-                logo = profile['overview']['logo']
+                logo = profile['overview'].get('logo')
                 profile['overview']['logo'] = self._get_logo(website, logo)
 
                 if fetch_finance_data:
