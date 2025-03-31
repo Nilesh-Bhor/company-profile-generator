@@ -8,6 +8,7 @@ class Settings:
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
     PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY", "")
+    PERPLEXITY_BASE_URL = "https://api.perplexity.ai"
     AGENT_TYPE = os.getenv("AGENT_TYPE", "GOOGLE_GEMINI")
     WKHTMLTOPDF_PATH = os.getenv("WKHTMLTOPDF_PATH", "")
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
