@@ -201,7 +201,7 @@ class ProfileGenerator:
                             p.font.size = Pt(14)
                             p.level = 0
                     
-                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+                    # prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
 
                 # Financial Highlights slide
                 if 'financial_highlights' in self.profile_data:
@@ -267,9 +267,8 @@ class ProfileGenerator:
                             p.text = f"Market Cap: {metric.get('market_cap', 'N/A')}"
                             p.font.size = Pt(12)
                             p.level = 1
-
-                    # Add a blank slide for separation
-                    prs.slides.add_slide(prs.slide_layouts[5])
+                    
+                    # prs.slides.add_slide(prs.slide_layouts[5]) # Add a blank slide for separation
 
                 # Products and Services slide
                 if 'products_services' in self.profile_data:
@@ -300,7 +299,7 @@ class ProfileGenerator:
                                 p.font.size = Pt(14)
                                 p.level = 2
                     
-                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+                    # prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
 
                 # Geographic Presence slide
                 if 'geographic_presence' in self.profile_data:
@@ -315,7 +314,7 @@ class ProfileGenerator:
                         p.font.size = Pt(14)
                         p.level = 0
                     
-                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+                    # prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
 
                 # Leadership slide
                 if 'leadership' in self.profile_data:
@@ -341,7 +340,7 @@ class ProfileGenerator:
                         p.font.size = Pt(14)
                         p.level = 1
                     
-                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+                    # prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
 
                 # Strategic Priorities slide
                 if 'strategic_priorities' in self.profile_data:
@@ -362,7 +361,7 @@ class ProfileGenerator:
                         p.font.size = Pt(14)
                         p.level = 1
                     
-                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+                    # prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
 
                 # Clients and Competitors slide
                 if 'clients_competitors' in self.profile_data:
@@ -393,7 +392,7 @@ class ProfileGenerator:
                         p.font.size = Pt(14)
                         p.level = 1
                     
-                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+                    # prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
 
                 # Key Events slide
                 if 'key_events' in self.profile_data and self.profile_data['key_events']:
@@ -414,7 +413,7 @@ class ProfileGenerator:
                         p.font.size = Pt(14)
                         p.level = 1
                     
-                    prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
+                    # prs.slides.add_slide(prs.slide_layouts[5])  # Add a blank slide for separation
 
                 # Sources slide
                 if 'sources' in self.profile_data:
