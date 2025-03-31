@@ -173,7 +173,7 @@ class CompanyProfile:
 
                 # update logo if found in clearbit
                 website = profile['overview']['website']
-                logo = profile['overview']['logo']
+                logo = profile['overview'].get('logo')
                 profile['overview']['logo'] = self._get_logo(website, logo)
 
                 if fetch_finance_data:

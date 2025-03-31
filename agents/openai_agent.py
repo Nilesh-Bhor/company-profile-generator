@@ -27,7 +27,11 @@ class OpenAIAgent(BaseAgent):
             temperature=0,
             response_format={
                 "type": "json_schema",
-                "json_schema": { "schema": json.loads(self.schema) },
+                "json_schema": {
+                    "name": "CompanyProfile",
+                    "schema": json.loads(self.schema),
+                    "description": "Schema for representing company profile."
+                },
             }
         )
 

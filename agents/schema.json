@@ -406,6 +406,18 @@
                     "title": "Industry Served",
                     "description": "The industries served by the company."
                 },
+                "symbol": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Symbol",
+                    "description": "Stock symbol of the company."
+                },
                 "logo": {
                     "anyOf": [
                         {
@@ -420,18 +432,6 @@
                     ],
                     "title": "Logo",
                     "description": "URL to the company's official logo, preferably from the official website or Clearbit."
-                },
-                "symbol": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Symbol",
-                    "description": "stock symbol of the company."
                 }
             },
             "required": [
@@ -446,8 +446,8 @@
                 "mission",
                 "vision",
                 "industry_served",
-                "logo",
-                "symbol"
+                "symbol",
+                "logo"
             ],
             "title": "Overview",
             "type": "object"
